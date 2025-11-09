@@ -1,0 +1,20 @@
+# Default reviewer for everything
+* @ozoneboxin/lead
+
+# --- Backend (Java, tests, config) ---
+/src/main/**        @ozoneboxin/backend @ozoneboxin/lead
+/src/test/**        @ozoneboxin/backend @ozoneboxin/lead
+pom.xml             @ozoneboxin/backend @ozoneboxin/lead
+
+# --- Infra & CI (DevOps) ---
+/infra/**           @ozoneboxin/devops  @ozoneboxin/lead
+/.github/workflows/** @ozoneboxin/devops @ozoneboxin/lead
+Dockerfile          @ozoneboxin/devops  @ozoneboxin/lead
+docker-compose.yml  @ozoneboxin/devops  @ozoneboxin/lead
+
+# --- Database migrations (backend + lead) ---
+/db/migration/**    @ozoneboxin/backend @ozoneboxin/lead
+
+# --- Docs (optional enforcement) ---
+/docs/**            @ozoneboxin/lead
+README.md           @ozoneboxin/lead
