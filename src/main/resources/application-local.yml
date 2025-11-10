@@ -1,3 +1,5 @@
 spring:
-  profiles:
-    active: local
+  datasource:
+    url: jdbc:postgresql://db:5432/cannaverse
+    username: cannaverse
+    password: cannaverse
