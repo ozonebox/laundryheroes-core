@@ -1,9 +1,7 @@
-name: CI - Build, Test and Push
+name: CI/CD - Build, Test, Push & Deploy
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
     branches: [ main ]
 
 jobs:
@@ -48,3 +46,36 @@ jobs:
           sleep 20
 
           curl -f http://localhost:8080/api/ping
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Add EC2 SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+      - name: Deploy to EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+            
+            echo "Pulling latest image from GHCR..."
+            docker pull ghcr.io/ozonebox/laundryheroes-core:latest
+            
+            echo "Stopping old container..."
+            docker stop laundryheroes-app || true
+            docker rm laundryheroes-app || true
+
+            echo "Starting new container..."
+            cd ~/laundryheroes-core
+            docker compose down
+            docker compose up -d
+
+            docker ps
+            
+          EOF
