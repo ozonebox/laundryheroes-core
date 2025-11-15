@@ -25,10 +25,10 @@ jobs:
         run: ./mvnw -B clean verify
 
       - name: Build Docker image
-        run: docker build -t cannaverse-core .
+        run: docker build -t laundryheroes-core .
 
       - name: Test Docker image runs
         run: |
-          docker run --rm -d -p 8080:8080 --name app cannaverse-core
+          docker run --rm -d -p 8080:8080 --name app laundryheroes-core
           sleep 10
           curl -f http://localhost:8080/api/ping

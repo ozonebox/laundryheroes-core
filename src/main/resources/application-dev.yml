@@ -1,5 +1,0 @@
-spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/cannaverse_dev
-    username: cannaverse
-    password: cannaverse

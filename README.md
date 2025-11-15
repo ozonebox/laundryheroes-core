@@ -1,4 +1,4 @@
-# cannaverse-core
+# laundryheroes-core
 
 V1 modular monolith — Spring Boot 3 (Java 21).
 
