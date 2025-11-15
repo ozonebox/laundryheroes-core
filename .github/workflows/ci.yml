@@ -1,4 +1,4 @@
-name: CI - Build, Test & Publish
+name: CI - Build, Test and Push
 
 on:
   push:
@@ -9,6 +9,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       - name: Checkout repository
@@ -24,37 +27,24 @@ jobs:
       - name: Build with Maven
         run: ./mvnw -B clean verify
 
-      # ----------------------------
-      # Login to GitHub Container Registry
-      # ----------------------------
-      - name: Login to GHCR
+      - name: Log in to GHCR
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      # ----------------------------
-      # Build Docker image
-      # ----------------------------
       - name: Build Docker image
-        run: |
-          docker build -t ghcr.io/${{ github.repository_owner }}/laundryheroes-core:latest .
+        run: docker build -t ghcr.io/ozonebox/laundryheroes-core:latest .
 
-      # ----------------------------
-      # Test container runs (CI mode)
-      # ----------------------------
+      - name: Push Docker image
+        run: docker push ghcr.io/ozonebox/laundryheroes-core:latest
+
       - name: Test Docker image runs
         run: |
           docker run --rm -d \
             -p 8080:8080 \
             -e SPRING_PROFILES_ACTIVE=ci \
             --name app \
-            ghcr.io/${{ github.repository_owner }}/laundryheroes-core:latest
+            ghcr.io/ozonebox/laundryheroes-core:latest
 
           echo "Waiting for the app to boot..."
           sleep 20
 
           curl -f http://localhost:8080/api/ping
-
-      # ----------------------------
-      # Push to GHCR
-      # ----------------------------
-      - name: Push Docker image
-        run: docker push ghcr.io/${{ github.repository_owner }}/laundryheroes-core:latest
