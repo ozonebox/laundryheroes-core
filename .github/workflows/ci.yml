@@ -30,10 +30,12 @@ jobs:
       - name: Test Docker image runs
         run: |
           docker run --rm -d \
-          -p 8080:8080 \
-          -e SPRING_PROFILES_ACTIVE="ci" \
-          --name app \
-          laundryheroes-core
+            -p 8080:8080 \
+            -e SPRING_PROFILES_ACTIVE=ci \
+            --name app \
+            laundryheroes-core
 
+          echo "Waiting for the app to boot..."
           sleep 20
+
           curl -f http://localhost:8080/api/ping
