@@ -3,11 +3,11 @@ version: "3.9"
 services:
   db:
     image: postgres:16
-    container_name: cannaverse-db
+    container_name: laundryheroes-db
     environment:
-      POSTGRES_USER: cannaverse
-      POSTGRES_PASSWORD: cannaverse
-      POSTGRES_DB: cannaverse
+      POSTGRES_USER: laundryheroes
+      POSTGRES_PASSWORD: laundryheroes
+      POSTGRES_DB: laundryheroes
     ports:
       - "5432:5432"
     volumes:
@@ -15,12 +15,9 @@ services:
 
   app:
     build: .
-    container_name: cannaverse-app
+    container_name: laundryheroes-app
     environment:
-      SPRING_PROFILES_ACTIVE: local
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/cannaverse
-      SPRING_DATASOURCE_USERNAME: cannaverse
-      SPRING_DATASOURCE_PASSWORD: cannaverse
+      SPRING_PROFILES_ACTIVE: "local"
     ports:
       - "8080:8080"
     depends_on:
