@@ -2,6 +2,7 @@ package com.laundryheroes.core.auth;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -16,60 +17,87 @@ import io.jsonwebtoken.security.Keys;
 public class JwtService {
 
     private final String secret;
-    private final long expirationMs;
+    private final long accessExpirationMs;
+    private final long refreshExpirationMs;
 
-    public JwtService(@Value("${jwt.secret}") String secret,
-                      @Value("${jwt.expiration-ms}") long expirationMs) {
+    public JwtService(
+            @Value("${jwt.secret}") String secret,
+            @Value("${jwt.access-expiration-ms}") long accessExpirationMs,
+            @Value("${jwt.refresh-expiration-ms}") long refreshExpirationMs
+    ) {
         this.secret = secret;
-        this.expirationMs = expirationMs;
+        this.accessExpirationMs = accessExpirationMs;
+        this.refreshExpirationMs = refreshExpirationMs;
     }
 
-    public String generateFullToken(User user) {
+
+    public String generateAccessTokenFull(User user) {
+        return buildAccessToken(user, "FULL");
+    }
+
+    public String generateAccessTokenPending(User user) {
+        return buildAccessToken(user, "PENDING");
+    }
+
+    private String buildAccessToken(User user, String authLevel) {
         Date now = new Date();
-        Date expiry = new Date(now.getTime() + expirationMs);
+        Date expiry = new Date(now.getTime() + accessExpirationMs);
+
         return Jwts.builder()
                 .setSubject(user.getEmail())
                 .setIssuedAt(now)
                 .setExpiration(expiry)
                 .claim("id", user.getId())
                 .claim("role", user.getRole().name())
-                .claim("authLevel", "FULL")
+                .claim("authLevel", authLevel)
                 .claim("profileStatus", user.getProfileStatus().name())
                 .signWith(Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8)))
                 .compact();
     }
 
-    public String generatePendingToken(User user) {
+
+    public String generateRefreshToken(User user) {
         Date now = new Date();
-        Date expiry = new Date(now.getTime() + expirationMs);
+        Date expiry = new Date(now.getTime() + refreshExpirationMs);
+
+        // Secure random string, avoids JWT overhead
+        String refreshTokenValue = UUID.randomUUID().toString() + "." + UUID.randomUUID();
+
         return Jwts.builder()
                 .setSubject(user.getEmail())
                 .setIssuedAt(now)
                 .setExpiration(expiry)
                 .claim("id", user.getId())
-                .claim("role", user.getRole().name())
-                .claim("authLevel", "PENDING")
-                .claim("profileStatus", user.getProfileStatus().name())
+                .claim("type", "REFRESH")
                 .signWith(Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8)))
                 .compact();
     }
 
     public String extractAuthLevel(String token) {
-    return getClaims(token).get("authLevel", String.class);
+        return getClaims(token).get("authLevel", String.class);
     }
-
 
     public String extractEmail(String token) {
         return getClaims(token).getSubject();
     }
 
-    public boolean isTokenValid(String token, String email,String profileStatus) {
+
+    public boolean isAccessTokenValid(String token, String email, String profileStatus) {
         Claims claims = getClaims(token);
+
         String subject = claims.getSubject();
         Date expiration = claims.getExpiration();
-        String claimsProfileStatus = claims.get("profileStatus").toString();
-        String role = (String) claims.get("role");
-        return subject != null && subject.equals(email) && expiration.after(new Date()) &&profileStatus.equalsIgnoreCase(claimsProfileStatus);
+        String claimsProfileStatus = claims.get("profileStatus", String.class);
+
+        return subject != null &&
+                subject.equals(email) &&
+                expiration.after(new Date()) &&
+                profileStatus.equalsIgnoreCase(claimsProfileStatus);
+    }
+
+    public boolean isRefreshToken(String token) {
+        Claims claims = getClaims(token);
+        return "REFRESH".equals(claims.get("type"));
     }
 
     private Claims getClaims(String token) {

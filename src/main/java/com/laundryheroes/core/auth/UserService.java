@@ -28,15 +28,17 @@ public class UserService {
     private final ResponseFactory responseFactory;
     private final EmailService emailService;
     private final JwtService jwtService;
+    private final RefreshTokenService refreshTokenService;
 
     public UserService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
-                       ResponseFactory responseFactory,EmailService emailService,JwtService jwtService) {
+                       ResponseFactory responseFactory,EmailService emailService,JwtService jwtService,RefreshTokenService refreshTokenService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.responseFactory = responseFactory;
         this.emailService = emailService;
         this.jwtService = jwtService;
+        this.refreshTokenService = refreshTokenService;
     }
 
     @Transactional
@@ -48,15 +50,15 @@ public class UserService {
         String hashedPassword = passwordEncoder.encode(request.getPassword());
         User user = new User(request.getEmail(), hashedPassword);
         User saved = userRepository.save(user);
-
-        UserResponse data = new UserResponse(
-                saved.getId(),
-                saved.getEmail(),
-                saved.getFirstName(),
-                saved.getLastName(),
-                saved.getGender(),
-                saved.getProfileStatus()
-        );
+        UserResponse data = UserResponse.builder()
+            .id(saved.getId())
+            .email(saved.getEmail())
+            .firstName(saved.getFirstName())
+            .lastName(saved.getLastName())
+            .gender(saved.getGender())
+            .profileStatus(saved.getProfileStatus())
+            .build();
+        
 
         return responseFactory.success(ResponseCode.REGISTER_SUCCESS, data);
     }
@@ -96,31 +98,34 @@ public class UserService {
         user.setLastFailedAt(null);
 
         if (user.getProfileStatus() == ProfileStatus.PENDING) {
-            UserResponse data = new UserResponse(
-                    user.getId(),
-                    user.getEmail(),
-                    user.getFirstName(),
-                    user.getLastName(),
-                    user.getGender(),
-                    user.getProfileStatus()
-            );
-            String token = jwtService.generatePendingToken(user);
-            data.setToken(token);
+            String accessToken = jwtService.generateAccessTokenPending(user);
+             UserResponse data = UserResponse.builder()
+            .id(user.getId())
+            .email(user.getEmail())
+            .firstName(user.getFirstName())
+            .lastName(user.getLastName())
+            .gender(user.getGender())
+            .profileStatus(user.getProfileStatus())
+            .token(accessToken)
+            .build();
+            
             return responseFactory.success(ResponseCode.PROFILE_PENDING,data);
         }
 
         userRepository.save(user);
-
-        UserResponse data = new UserResponse(
-                user.getId(),
-                user.getEmail(),
-                user.getFirstName(),
-                user.getLastName(),
-                user.getGender(),
-                user.getProfileStatus()
-        );
-        String token = jwtService.generateFullToken(user);
-        data.setToken(token);
+        String accessToken = jwtService.generateAccessTokenFull(user);
+        RefreshToken refreshToken = refreshTokenService.create(user);
+        UserResponse data = UserResponse.builder()
+            .id(user.getId())
+            .email(user.getEmail())
+            .firstName(user.getFirstName())
+            .lastName(user.getLastName())
+            .gender(user.getGender())
+            .profileStatus(user.getProfileStatus())
+            .token(accessToken)
+            .refreshToken(refreshToken.getToken())
+            .build();
+        
 
         return responseFactory.success(ResponseCode.LOGIN_SUCCESS, data);
     }
@@ -204,15 +209,14 @@ public class UserService {
         user.setVerificationAuthKey(null);
 
         userRepository.save(user);
-
-        UserResponse data = new UserResponse(
-                user.getId(),
-                user.getEmail(),
-                user.getFirstName(),
-                user.getLastName(),
-                user.getGender(),
-                user.getProfileStatus()
-        );
+         UserResponse data = UserResponse.builder()
+            .id(user.getId())
+            .email(user.getEmail())
+            .firstName(user.getFirstName())
+            .lastName(user.getLastName())
+            .gender(user.getGender())
+            .profileStatus(user.getProfileStatus())
+            .build();
 
         return responseFactory.success(ResponseCode.PROFILE_ACTIVATED, data);
     }
@@ -296,18 +300,60 @@ public class UserService {
         user.setLastResetOtpSentAt(null);
 
         userRepository.save(user);
-
-        UserResponse data = new UserResponse(
-                user.getId(),
-                user.getEmail(),
-                user.getFirstName(),
-                user.getLastName(),
-                user.getGender(),
-                user.getProfileStatus()
-        );
+        UserResponse data = UserResponse.builder()
+            .id(user.getId())
+            .email(user.getEmail())
+            .firstName(user.getFirstName())
+            .lastName(user.getLastName())
+            .gender(user.getGender())
+            .profileStatus(user.getProfileStatus())
+            .build();
 
         return responseFactory.success(ResponseCode.PASSWORD_RESET_SUCCESS, data);
     }
+
+    @Transactional
+    public ApiResponse<UserResponse> refresh(String refreshTokenValue) {
+
+        var optionalRotated = refreshTokenService.validateAndRotate(refreshTokenValue);
+        if (optionalRotated.isEmpty()) {
+            return responseFactory.error(ResponseCode.INVALID_REFRESH_TOKEN);
+        }
+
+        RefreshToken newRefresh = optionalRotated.get();
+        User user = newRefresh.getUser();
+
+        if (user.getProfileStatus() != ProfileStatus.ACTIVE) {
+            return responseFactory.error(ResponseCode.PROFILE_NOT_ACTIVE);
+        }
+
+        // Create fresh access token
+        String newAccess = jwtService.generateAccessTokenFull(user);
+
+        UserResponse data = UserResponse.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .gender(user.getGender())
+                .profileStatus(user.getProfileStatus())
+                .token(newAccess)
+                .refreshToken(newRefresh.getToken())
+                .build();
+
+        return responseFactory.success(ResponseCode.SUCCESS, data);
+    }
+    @Transactional
+    public ApiResponse<?> logout(String refreshTokenValue) {
+
+        if (refreshTokenValue != null && !refreshTokenValue.isBlank()) {
+            refreshTokenService.revokeAllForToken(refreshTokenValue);
+        }
+
+        return responseFactory.success(ResponseCode.LOGOUT_SUCCESS, null);
+    }
+
+
 
 
 }

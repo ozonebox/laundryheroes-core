@@ -2,6 +2,13 @@ package com.laundryheroes.core.auth;
 
 import com.laundryheroes.core.user.ProfileStatus;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+
+@Data
+@AllArgsConstructor
+@Builder
 public class UserResponse {
 
     private Long id;
@@ -11,47 +18,5 @@ public class UserResponse {
     private String gender;
     private ProfileStatus profileStatus;
     private String token;
-
-    public UserResponse() {
-    }
-
-    public UserResponse(Long id, String email, String firstName, String lastName, String gender, ProfileStatus profileStatus) {
-        this.id = id;
-        this.email = email;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.gender = gender;
-        this.profileStatus = profileStatus;
-    }
-
-    public Long getId() {
-        return id;
-    }
-     public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token=token;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public String getGender() {
-        return gender;
-    }
-
-    public ProfileStatus getProfileStatus() {
-        return profileStatus;
-    }
+    private String refreshToken;
 }

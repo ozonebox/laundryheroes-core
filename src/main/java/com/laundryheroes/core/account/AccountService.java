@@ -32,6 +32,35 @@ public class AccountService {
         this.responseFactory = responseFactory;
     }
 
+     @Transactional
+    public ApiResponse<UserResponse> me(User authUser) {
+         if(!authUser.getEmail().equalsIgnoreCase(authUser.getEmail())){
+            return responseFactory.error(ResponseCode.INVALID_REQUEST);
+        }
+        Optional<User> optional = userRepository.findByEmail(authUser.getEmail());
+        if (optional.isEmpty()) {
+            return responseFactory.error(ResponseCode.USER_NOT_FOUND);
+        }
+
+        User user = optional.get();
+
+        if (user.getProfileStatus() == ProfileStatus.BLOCKED ||
+            user.getProfileStatus() == ProfileStatus.DISABLED) {
+            return responseFactory.error(ResponseCode.USER_BLOCKED);
+        }
+        UserResponse data = UserResponse.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .gender(user.getGender())
+                .profileStatus(user.getProfileStatus())
+                .build();
+
+        return responseFactory.success(ResponseCode.SUCCESS, data);
+    }
+
+
     @Transactional
     public ApiResponse<UserResponse> editProfile(User authUser,EditProfileRequest request) {
          if(!authUser.getEmail().equalsIgnoreCase(request.getEmail())){
@@ -54,15 +83,14 @@ public class AccountService {
         if (request.getGender() != null) user.setGender(request.getGender());
 
         userRepository.save(user);
-
-        UserResponse data = new UserResponse(
-                user.getId(),
-                user.getEmail(),
-                user.getFirstName(),
-                user.getLastName(),
-                user.getGender(),
-                user.getProfileStatus()
-        );
+        UserResponse data = UserResponse.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .gender(user.getGender())
+                .profileStatus(user.getProfileStatus())
+                .build();
 
         return responseFactory.success(ResponseCode.EDIT_PROFILE_SUCCESS, data);
     }
@@ -100,14 +128,14 @@ public class AccountService {
 
         userRepository.save(user);
 
-        UserResponse data = new UserResponse(
-                user.getId(),
-                user.getEmail(),
-                user.getFirstName(),
-                user.getLastName(),
-                user.getGender(),
-                user.getProfileStatus()
-        );
+        UserResponse data = UserResponse.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .gender(user.getGender())
+                .profileStatus(user.getProfileStatus())
+                .build();
 
         return responseFactory.success(ResponseCode.CHANGE_PASSWORD_SUCCESS, data);
     }
