@@ -17,7 +17,7 @@ public enum ResponseCode {
     USER_NOT_FOUND("57", "User not found"),
     INVALID_REQUEST("90", "Invalid request"),
     FAILURE("99", "Operation failed"),
-    DUPLICATE("92", "Duplicate record"),
+    DUPLICATE("92", "Email address is already registered"),
     OTP_EXPIRED("58", "OTP expired"),
     INVALID_OTP("59", "Invalid OTP"),
     PROFILE_ALREADY_ACTIVE("60", "Profile already active"),
@@ -49,7 +49,10 @@ public enum ResponseCode {
     PICKUP_NOT_FOUND("13","Cannot proceed. Pickup not found."),
     DELIVERY_NOT_FOUND("13","Cannot proceed. Delivery not found."),
     INVALID_STATUS("13","Cannot proceed. Invalid status."),
-    INVALID_DRIVER("13","Cannot proceed. Invalid driver."),
+    INVALID_DRIVER("13","Cannot proceed. Invalid dri."),
+    INVALID_REFRESH_TOKEN("13","Cannot proceed. Invalid driver."),
+    PROFILE_NOT_ACTIVE("31","Cannot proceed. No access."),
+    LOGOUT_SUCCESS("00","Logout successful."),
     PASSWORD_MISMATCH("12","Passwords don't match");
 
 

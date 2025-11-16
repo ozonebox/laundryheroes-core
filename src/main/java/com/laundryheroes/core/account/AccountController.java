@@ -18,6 +18,13 @@ public class AccountController {
         this.accountService = accountService;
     }
 
+    @GetMapping("/me")
+    public ApiResponse<UserResponse> me(org.springframework.security.core.Authentication auth) {
+        User user = (User) auth.getPrincipal();
+
+        return accountService.me(user);
+    }
+
     @PostMapping("/edit-profile")
     public ApiResponse<UserResponse> editProfile(@RequestBody @Valid EditProfileRequest request,org.springframework.security.core.Authentication auth) {
         User user = (User) auth.getPrincipal();
