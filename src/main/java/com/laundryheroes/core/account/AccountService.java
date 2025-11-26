@@ -2,6 +2,7 @@
 
 package com.laundryheroes.core.account;
 
+import java.util.List;
 import java.util.Optional;
 
 
@@ -9,10 +10,17 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.laundryheroes.core.address.AddressService;
 import com.laundryheroes.core.auth.UserResponse;
 import com.laundryheroes.core.common.ApiResponse;
 import com.laundryheroes.core.common.ResponseCode;
 import com.laundryheroes.core.common.ResponseFactory;
+import com.laundryheroes.core.info.SupportMetaResponse;
+import com.laundryheroes.core.info.SupportService;
+import com.laundryheroes.core.order.OrderService;
+import com.laundryheroes.core.servicecatalog.LaundryServiceService;
+import com.laundryheroes.core.servicecatalog.PresetService;
+import com.laundryheroes.core.servicecatalog.ServiceResponse;
 import com.laundryheroes.core.user.ProfileStatus;
 import com.laundryheroes.core.user.User;
 import com.laundryheroes.core.user.UserRepository;
@@ -23,13 +31,28 @@ public class AccountService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final ResponseFactory responseFactory;
+    private final LaundryServiceService laundryService;
+    private final AddressService addressService;
+    private final OrderService orderService;
+    private final PresetService presetService;
+    private final SupportService supportService;
 
     public AccountService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
-                       ResponseFactory responseFactory) {
+                       ResponseFactory responseFactory,
+                       LaundryServiceService laundryService,
+                       AddressService addressService,
+                       OrderService orderService,
+                       PresetService presetService,
+                       SupportService supportService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.responseFactory = responseFactory;
+        this.laundryService = laundryService;
+        this.addressService = addressService;
+        this.orderService = orderService;
+        this.presetService = presetService;
+        this.supportService = supportService;
     }
 
      @Transactional
@@ -48,6 +71,11 @@ public class AccountService {
             user.getProfileStatus() == ProfileStatus.DISABLED) {
             return responseFactory.error(ResponseCode.USER_BLOCKED);
         }
+        ApiResponse<List<ServiceResponse>> laundryServicesList =laundryService.getActiveServices();
+        ApiResponse<?> addressList =addressService.list(user);
+        ApiResponse<?> orderList =orderService.userOrders(user);
+        ApiResponse<?> presetList =presetService.getPresetServices();
+        ApiResponse<?> supportInfo =supportService.getSupportInfo();
         UserResponse data = UserResponse.builder()
                 .id(user.getId())
                 .email(user.getEmail())
@@ -57,7 +85,12 @@ public class AccountService {
                 .profileStatus(user.getProfileStatus())
                 .build();
 
-        return responseFactory.success(ResponseCode.SUCCESS, data);
+        return responseFactory.success(ResponseCode.SUCCESS, data)
+        .addField("laundryServicesList", laundryServicesList)
+        .addField("addressList", addressList)
+        .addField("ordersList", orderList)
+        .addField("presetList", presetList)
+        .addField("supportInfo", supportInfo);
     }
 
 

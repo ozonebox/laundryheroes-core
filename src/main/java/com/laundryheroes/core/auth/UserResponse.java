@@ -17,6 +17,6 @@ public class UserResponse {
     private String lastName;
     private String gender;
     private ProfileStatus profileStatus;
-    private String token;
+    private String accessToken;
     private String refreshToken;
 }

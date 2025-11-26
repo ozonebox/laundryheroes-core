@@ -8,14 +8,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.laundryheroes.core.common.ResponseCode;
 import com.laundryheroes.core.user.User;
+import com.laundryheroes.core.user.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class RefreshTokenService {
-
+    private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
 
     @Value("${jwt.refresh-expiration-ms}")
@@ -43,10 +45,15 @@ public class RefreshTokenService {
 
     
     @Transactional
-    public Optional<RefreshToken> validateAndRotate(String token) {
+    public Optional<RefreshToken> validateAndRotate(String email,String token) {
         Instant now = Instant.now();
+        Optional<User> optional = userRepository.findByEmail(email);
+        if (optional.isEmpty()) {
+            return Optional.empty();
+        }
 
-        Optional<RefreshToken> opt = refreshTokenRepository.findByToken(token);
+        User user = optional.get();
+        Optional<RefreshToken> opt = refreshTokenRepository.findByUserAndToken(user,token);
 
         if (opt.isEmpty()) return Optional.empty();
 
@@ -66,12 +73,16 @@ public class RefreshTokenService {
         return Optional.of(newToken);
     }
     @Transactional
-    public void revokeAllForToken(String tokenValue) {
+    public void revokeAllForToken(String email,String tokenValue) {
         if (tokenValue == null || tokenValue.isBlank()) {
             return;
         }
-
-        refreshTokenRepository.findByToken(tokenValue)
+        Optional<User> optional = userRepository.findByEmail(email);
+        if (optional.isEmpty()) {
+            return;
+        }
+        User user = optional.get();
+        refreshTokenRepository.findByUserAndToken(user,tokenValue)
                 .ifPresent(rt -> revokeAllForUser(rt.getUser()));
     }
     

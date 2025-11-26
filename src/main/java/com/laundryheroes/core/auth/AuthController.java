@@ -40,17 +40,9 @@ public class AuthController {
 
             return ResponseEntity.status(200).body(response);
         }
-        UserResponse user = response.getData();
-        String accessToken = user.getToken();
-        String refreshToken = user.getRefreshToken();
 
-
-        ResponseCookie accessCookie = buildCookie("ACCESS_TOKEN", accessToken, ACCESS_COOKIE_MAXAGE);
-        ResponseCookie refreshCookie = buildCookie("REFRESH_TOKEN", refreshToken, REFRESH_COOKIE_MAXAGE);
 
         return ResponseEntity.ok()
-                .header("Set-Cookie", accessCookie.toString())
-                .header("Set-Cookie", refreshCookie.toString())
                 .body(response);
     }
 
@@ -67,7 +59,11 @@ public class AuthController {
     public ResponseEntity<ApiResponse<UserResponse>> activateUser(@RequestBody @Valid ActivateUserRequest request,org.springframework.security.core.Authentication auth) {
         User user = (User) auth.getPrincipal();
         ApiResponse<UserResponse> response = userService.activateUser(user,request);
-        return ResponseEntity.ok(response);
+       
+
+
+        return ResponseEntity.ok()
+                .body(response);
     }
 
     @PostMapping("/reset-password")
@@ -83,63 +79,27 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<ApiResponse<?>> refresh(@CookieValue(value = "REFRESH_TOKEN", required = false) String rt) {
+    public ResponseEntity<ApiResponse<?>> refresh(@RequestBody @Valid RefreshTokenRequest request) {
 
-        ApiResponse<UserResponse> response = userService.refresh(rt);
+        ApiResponse<UserResponse> response = userService.refresh(request);
 
         if (!response.getResponseCode().equals(ResponseCode.SUCCESS.code())) {
             return ResponseEntity.ok(response);
         }
 
-        UserResponse data = response.getData();
 
-        ResponseCookie newAccess = ResponseCookie.from("AUTH_TOKEN", data.getToken())
-                .httpOnly(true)
-                .secure(false)
-                .path("/")
-                .sameSite("Strict")
-                .maxAge(86400)
-                .build();
-
-        ResponseCookie newRefresh = ResponseCookie.from("REFRESH_TOKEN", data.getRefreshToken())
-                .httpOnly(true)
-                .secure(false)
-                .path("/")
-                .sameSite("Strict")
-                .maxAge(2592000)
-                .build();
 
         return ResponseEntity.ok()
-                .header("Set-Cookie", newAccess.toString())
-                .header("Set-Cookie", newRefresh.toString())
                 .body(response);
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<?>> logout(
-            @CookieValue(value = "REFRESH_TOKEN", required = false) String rt) {
+    public ResponseEntity<ApiResponse<?>> logout(@RequestBody @Valid RefreshTokenRequest request) {
 
-        ApiResponse<?> response = userService.logout(rt);
+        ApiResponse<?> response = userService.logout(request);
 
-        ResponseCookie clearAccess = ResponseCookie.from("AUTH_TOKEN", "")
-                .httpOnly(true)
-                .secure(false)
-                .path("/")
-                .sameSite("Strict")
-                .maxAge(0)
-                .build();
-
-        ResponseCookie clearRefresh = ResponseCookie.from("REFRESH_TOKEN", "")
-                .httpOnly(true)
-                .secure(false)
-                .path("/")
-                .sameSite("Strict")
-                .maxAge(0)
-                .build();
 
         return ResponseEntity.ok()
-                .header("Set-Cookie", clearAccess.toString())
-                .header("Set-Cookie", clearRefresh.toString())
                 .body(response);
     }
 

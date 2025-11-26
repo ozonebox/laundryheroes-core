@@ -24,29 +24,13 @@ public class CartController {
 
     @PostMapping("/add")
     @PreAuthorize("hasRole('CUSTOMER')")
-    public ApiResponse<?> add(@Valid @RequestBody AddToCartRequest request,
+    public ApiResponse<?> add(@Valid @RequestBody CreateCartRequest request,
                               Authentication auth) {
         User user = (User) auth.getPrincipal();
         return service.addToCart(user, request);
     }
 
-    @PostMapping("/{id}/update")
-    @PreAuthorize("hasRole('CUSTOMER')")
-    public ApiResponse<?> update(
-            @PathVariable Long id,
-            @Valid @RequestBody UpdateCartRequest request,
-            Authentication auth
-    ) {
-        User user = (User) auth.getPrincipal();
-        return service.updateCartItem(user, id, request);
-    }
-
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('CUSTOMER')")
-    public ApiResponse<?> remove(@PathVariable Long id, Authentication auth) {
-        User user = (User) auth.getPrincipal();
-        return service.removeItem(user, id);
-    }
+  
 
     @DeleteMapping("/clear")
     @PreAuthorize("hasRole('CUSTOMER')")
@@ -57,7 +41,7 @@ public class CartController {
 
     @GetMapping
     @PreAuthorize("hasRole('CUSTOMER')")
-    public ApiResponse<List<CartItemResponse>> cart(Authentication auth) {
+    public ApiResponse<List<CartResponse>> cart(Authentication auth) {
         User user = (User) auth.getPrincipal();
         return service.getCart(user);
     }

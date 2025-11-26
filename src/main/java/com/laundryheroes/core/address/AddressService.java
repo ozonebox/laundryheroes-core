@@ -32,11 +32,14 @@ public class AddressService {
         address.setPhone(request.getPhone());
         address.setAddress(request.getAddress());
         address.setDefault(isFirst);
+        address.setLat(request.getLat());
+        address.setLong(request.getLng());
+        address.setLabel(request.getLabel());
 
         Address saved = addressRepository.save(address);
 
         return responseFactory.success(ResponseCode.ADDRESS_SUCCESS,
-                new AddressResponse(saved.getId(), saved.getName(), saved.getPhone(), saved.getAddress(), saved.isDefault())
+                new AddressResponse(saved.getId(), saved.getName(), saved.getPhone(), saved.getAddress(), saved.isDefault(),saved.getLat(),saved.getLng(),saved.getLabel())
         );
     }
 
@@ -55,11 +58,14 @@ public class AddressService {
         address.setName(request.getName());
         address.setPhone(request.getPhone());
         address.setAddress(request.getAddress());
+        address.setLat(request.getLat());
+        address.setLong(request.getLng());
+        address.setLabel(request.getLabel());
 
         Address saved = addressRepository.save(address);
 
         return responseFactory.success(ResponseCode.ADDRESS_EDIT_SUCCESS,
-                new AddressResponse(saved.getId(), saved.getName(), saved.getPhone(), saved.getAddress(), saved.isDefault())
+                new AddressResponse(saved.getId(), saved.getName(), saved.getPhone(), saved.getAddress(), saved.isDefault(),saved.getLat(),saved.getLng(),saved.getLabel())
         );
     }
 
@@ -109,7 +115,10 @@ public class AddressService {
                         a.getName(),
                         a.getPhone(),
                         a.getAddress(),
-                        a.isDefault()
+                        a.isDefault(),
+                        a.getLat(),
+                        a.getLng(),
+                        a.getLabel()
                 ))
                 .toList();
 

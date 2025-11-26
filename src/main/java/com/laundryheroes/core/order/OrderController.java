@@ -30,11 +30,23 @@ public class OrderController {
         return orderService.createOrder(user, request);
     }
 
+    @PostMapping("/cancel/{orderId}")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ApiResponse<OrderResponse> cancelOrder(
+            @PathVariable Long orderId,
+            Authentication auth
+    ) {
+        User user = (User) auth.getPrincipal();
+        return orderService.cancelOrder(user, orderId);
+    }
+
     @PostMapping("/{orderId}/accept")
     @PreAuthorize("hasAnyRole('ADMIN','SUPERADMIN')")
     public ApiResponse<OrderResponse> acceptOrder(@PathVariable Long orderId) {
         return orderService.acceptOrder(orderId);
     }
+
+
 
     @GetMapping("/mine")
     @PreAuthorize("hasRole('CUSTOMER')")

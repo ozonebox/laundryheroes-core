@@ -106,7 +106,7 @@ public class UserService {
             .lastName(user.getLastName())
             .gender(user.getGender())
             .profileStatus(user.getProfileStatus())
-            .token(accessToken)
+            .accessToken(accessToken)
             .build();
             
             return responseFactory.success(ResponseCode.PROFILE_PENDING,data);
@@ -122,7 +122,7 @@ public class UserService {
             .lastName(user.getLastName())
             .gender(user.getGender())
             .profileStatus(user.getProfileStatus())
-            .token(accessToken)
+            .accessToken(accessToken)
             .refreshToken(refreshToken.getToken())
             .build();
         
@@ -209,15 +209,18 @@ public class UserService {
         user.setVerificationAuthKey(null);
 
         userRepository.save(user);
-         UserResponse data = UserResponse.builder()
+        String accessToken = jwtService.generateAccessTokenFull(user);
+        RefreshToken refreshToken = refreshTokenService.create(user);
+        UserResponse data = UserResponse.builder()
             .id(user.getId())
             .email(user.getEmail())
             .firstName(user.getFirstName())
             .lastName(user.getLastName())
             .gender(user.getGender())
             .profileStatus(user.getProfileStatus())
+            .accessToken(accessToken)
+            .refreshToken(refreshToken.getToken())
             .build();
-
         return responseFactory.success(ResponseCode.PROFILE_ACTIVATED, data);
     }
 
@@ -313,9 +316,9 @@ public class UserService {
     }
 
     @Transactional
-    public ApiResponse<UserResponse> refresh(String refreshTokenValue) {
+    public ApiResponse<UserResponse> refresh(RefreshTokenRequest request) {
 
-        var optionalRotated = refreshTokenService.validateAndRotate(refreshTokenValue);
+        var optionalRotated = refreshTokenService.validateAndRotate(request.getEmail(),request.getRefreshToken());
         if (optionalRotated.isEmpty()) {
             return responseFactory.error(ResponseCode.INVALID_REFRESH_TOKEN);
         }
@@ -337,17 +340,17 @@ public class UserService {
                 .lastName(user.getLastName())
                 .gender(user.getGender())
                 .profileStatus(user.getProfileStatus())
-                .token(newAccess)
+                .accessToken(newAccess)
                 .refreshToken(newRefresh.getToken())
                 .build();
 
         return responseFactory.success(ResponseCode.SUCCESS, data);
     }
     @Transactional
-    public ApiResponse<?> logout(String refreshTokenValue) {
+    public ApiResponse<?> logout(RefreshTokenRequest request) {
 
-        if (refreshTokenValue != null && !refreshTokenValue.isBlank()) {
-            refreshTokenService.revokeAllForToken(refreshTokenValue);
+        if (request.getRefreshToken() != null && !request.getRefreshToken().isBlank()) {
+            refreshTokenService.revokeAllForToken(request.getEmail(),request.getRefreshToken() );
         }
 
         return responseFactory.success(ResponseCode.LOGOUT_SUCCESS, null);

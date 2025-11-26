@@ -1,15 +1,14 @@
 package com.laundryheroes.core.cart;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.laundryheroes.core.servicecatalog.LaundryService;
-import com.laundryheroes.core.user.User;
 
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "cart_items",
-       uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "service_id"}))
+@Table(name = "cart_items")
 @Data
 @NoArgsConstructor
 public class CartItem {
@@ -18,14 +17,19 @@ public class CartItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(optional = false)
-    private User user;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cart_id", nullable = false)
+    @JsonIgnore
+    private Cart cart;
 
     @ManyToOne(optional = false)
-    private LaundryService service;
+    private LaundryService laundryService;
 
     @Column(nullable = false)
     private int quantity;
+
+    @Column(nullable = false)
+    private double unitPrice;
 
     @Column(nullable = false)
     private double subtotal;

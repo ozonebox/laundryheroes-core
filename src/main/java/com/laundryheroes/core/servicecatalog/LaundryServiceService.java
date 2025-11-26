@@ -87,6 +87,8 @@ public class LaundryServiceService {
         return responseFactory.success(ResponseCode.SUCCESS, list);
     }
 
+    
+
     public ApiResponse<List<ServiceResponse>> getAllServices() {
 
         List<ServiceResponse> list = repository.findAll()
@@ -102,6 +104,7 @@ public class LaundryServiceService {
                 service.getId(),
                 service.getServiceType(),
                 service.getItemType(),
+                service.getSpeed(),
                 service.getCategory(),
                 service.getPrice(),
                 service.isActive()

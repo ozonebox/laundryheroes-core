@@ -3,6 +3,7 @@ package com.laundryheroes.core.order;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.laundryheroes.core.address.AddressResponse;
 import com.laundryheroes.core.common.ApiResponse;
 import com.laundryheroes.core.common.ResponseCode;
 import com.laundryheroes.core.common.ResponseFactory;
@@ -49,9 +50,11 @@ public class OrderProcessingService {
     private OrderResponse toResponse(Order order) {
         return new OrderResponse(
                 order.getId(),
-                order.getAddress().getId(),
+                new AddressResponse(order.getAddress()),
                 order.getStatus(),
                 order.getTotalAmount(),
+                100.00,
+                100.00,
                 order.getCreatedAt(),
                 order.getPickupTimeRequested(),
                 order.getItems().stream()
@@ -63,7 +66,9 @@ public class OrderProcessingService {
                                 i.getUnitPrice(),
                                 i.getQuantity(),
                                 i.getSubtotal()
-                        )).toList()
+                        )).toList(),
+                order.getPickup(),
+                order.getDelivery()
         );
     }
 }

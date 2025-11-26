@@ -1,5 +1,6 @@
 package com.laundryheroes.core.cart;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -9,6 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.laundryheroes.core.common.ApiResponse;
 import com.laundryheroes.core.common.ResponseCode;
 import com.laundryheroes.core.common.ResponseFactory;
+import com.laundryheroes.core.order.OrderItem;
+import com.laundryheroes.core.order.OrderItemResponse;
+import com.laundryheroes.core.order.OrderResponse;
 import com.laundryheroes.core.servicecatalog.LaundryService;
 import com.laundryheroes.core.servicecatalog.LaundryServiceRepository;
 import com.laundryheroes.core.user.User;
@@ -16,66 +20,53 @@ import com.laundryheroes.core.user.User;
 @Service
 public class CartService {
 
-    private final CartItemRepository cartRepo;
+    private final CartRepository cartRepo;
+    private final CartItemRepository cartItemRepo;
     private final LaundryServiceRepository serviceRepo;
     private final ResponseFactory responseFactory;
 
-    public CartService(CartItemRepository cartRepo,
+    public CartService(CartRepository cartRepo,
                        LaundryServiceRepository serviceRepo,
-                       ResponseFactory responseFactory) {
+                       ResponseFactory responseFactory,CartItemRepository cartItemRepo) {
         this.cartRepo = cartRepo;
         this.serviceRepo = serviceRepo;
         this.responseFactory = responseFactory;
+        this.cartItemRepo = cartItemRepo;
     }
 
     @Transactional
-    public ApiResponse<?> addToCart(User user, AddToCartRequest request) {
+    public ApiResponse<?> addToCart(User user, CreateCartRequest request) {
+        Cart cart =  new Cart();
+        cart.setUser(user);
+        cartRepo.save(cart);
+       List<CartItem> cartItems = new ArrayList<>();
+       double total = 0;
+       for(CreateCartItemRequest item: request.getItems()){
+             LaundryService service = serviceRepo.findById(item.getServiceId()).orElse(null);
+            if (service == null || !service.isActive()) {
+                return responseFactory.error(ResponseCode.SERVICE_NOT_FOUND);
+            }
 
-        LaundryService service = serviceRepo.findById(request.getServiceId()).orElse(null);
-        if (service == null || !service.isActive()) {
-            return responseFactory.error(ResponseCode.SERVICE_NOT_FOUND);
-        }
+            CartItem newItem = new CartItem();
+            newItem.setCart(cart);
+            newItem.setLaundryService(service);
+            newItem.setUnitPrice(service.getPrice());
+            newItem.setQuantity(item.getQuantity());
+            double subtotal = service.getPrice() * item.getQuantity();
+            newItem.setSubtotal(subtotal);
+            cartItemRepo.save(newItem);
+            total += subtotal;
+            cartItems.add(newItem);
+       }
+       cart.setTotalAmount(total);
+       cart.setItems(cartItems);
+       cartRepo.save(cart);
 
-        CartItem item = cartRepo.findByUserAndService(user, service)
-                .orElse(new CartItem());
+       
 
-        item.setUser(user);
-        item.setService(service);
-        item.setQuantity(request.getQuantity());
-        item.setSubtotal(service.getPrice() * request.getQuantity());
-
-        cartRepo.save(item);
-
-        return responseFactory.success(ResponseCode.SUCCESS, null);
+        return responseFactory.success(ResponseCode.SUCCESS, toResponse(cart));
     }
 
-    @Transactional
-    public ApiResponse<?> updateCartItem(User user, Long cartItemId, UpdateCartRequest request) {
-
-        CartItem item = cartRepo.findById(cartItemId).orElse(null);
-        if (item == null || !item.getUser().getId().equals(user.getId())) {
-            return responseFactory.error(ResponseCode.CART_ITEM_NOT_FOUND);
-        }
-
-        item.setQuantity(request.getQuantity());
-        item.setSubtotal(item.getService().getPrice() * request.getQuantity());
-
-        cartRepo.save(item);
-
-        return responseFactory.success(ResponseCode.SUCCESS, null);
-    }
-
-    @Transactional
-    public ApiResponse<?> removeItem(User user, Long cartItemId) {
-
-        CartItem item = cartRepo.findById(cartItemId).orElse(null);
-        if (item == null || !item.getUser().getId().equals(user.getId())) {
-            return responseFactory.error(ResponseCode.CART_ITEM_NOT_FOUND);
-        }
-
-        cartRepo.delete(item);
-        return responseFactory.success(ResponseCode.SUCCESS, null);
-    }
 
     @Transactional
     public ApiResponse<?> clearCart(User user) {
@@ -84,22 +75,36 @@ public class CartService {
         return responseFactory.success(ResponseCode.SUCCESS, null);
     }
 
-    public ApiResponse<List<CartItemResponse>> getCart(User user) {
+    public ApiResponse<List<CartResponse>> getCart(User user) {
 
-        List<CartItemResponse> list = cartRepo.findByUser(user)
-                .stream()
-                .map(c -> new CartItemResponse(
-                        c.getId(),
-                        c.getService().getId(),
-                        c.getService().getServiceType(),
-                        c.getService().getItemType(),
-                        c.getService().getCategory(),
-                        c.getService().getPrice(),
-                        c.getQuantity(),
-                        c.getSubtotal()
-                ))
-                .collect(Collectors.toList());
+        List<CartResponse> list = cartRepo.findByUser(user)
+        .stream()
+        .map(this::toResponse)
+        .toList();
 
         return responseFactory.success(ResponseCode.SUCCESS, list);
+    }
+
+    private CartResponse toResponse(Cart cart) {
+
+        List<CartItemResponse> items = cart.getItems()
+                .stream()
+                .map(i -> new CartItemResponse(
+                        i.getLaundryService().getId(),
+                        i.getLaundryService().getServiceType(),
+                        i.getLaundryService().getItemType(),
+                        i.getLaundryService().getCategory(),
+                        i.getUnitPrice(),
+                        i.getQuantity(),
+                        i.getSubtotal()
+                ))
+                .toList();
+
+        return new CartResponse(
+                cart.getId(),
+                cart.getCreatedAt(),
+                cart.getTotalAmount(),
+                items
+        );
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.laundryheroes.core.address.Address;
 import com.laundryheroes.core.address.AddressRepository;
+import com.laundryheroes.core.address.AddressResponse;
 import com.laundryheroes.core.common.ApiResponse;
 import com.laundryheroes.core.common.ResponseCode;
 import com.laundryheroes.core.common.ResponseFactory;
@@ -91,6 +92,27 @@ public class OrderService {
         return responseFactory.success(ResponseCode.SUCCESS, toResponse(order));
     }
 
+    @Transactional
+    public ApiResponse<OrderResponse> cancelOrder(User user,Long orderId) {
+        // Find order
+        Order order = orderRepository.findByIdAndUser(orderId,user).orElse(null);
+        if (order == null) {
+            return responseFactory.error(ResponseCode.ORDER_NOT_FOUND);
+        }
+
+        // Only allow cancel when still pending
+        if (order.getStatus() != OrderStatus.PENDING) {
+            return responseFactory.error(ResponseCode.INVALID_ORDER_STATUS);
+        }
+
+        // Set status to CANCELLED
+        order.setStatus(OrderStatus.CANCELLED);
+        orderRepository.save(order);
+
+        return responseFactory.success(ResponseCode.SUCCESS, toResponse(order));
+    }
+
+
     public ApiResponse<List<OrderResponse>> userOrders(User user) {
         List<OrderResponse> list = orderRepository.findByUser(user)
                 .stream()
@@ -117,12 +139,16 @@ public class OrderService {
 
         return new OrderResponse(
                 order.getId(),
-                order.getAddress() != null ? order.getAddress().getId() : null,
+                new AddressResponse(order.getAddress()),
                 order.getStatus(),
                 order.getTotalAmount(),
+                100.00,
+                100.00,
                 order.getCreatedAt(),
                 order.getPickupTimeRequested(),
-                items
+                items,
+                order.getPickup(),
+                order.getDelivery()
         );
     }
 }

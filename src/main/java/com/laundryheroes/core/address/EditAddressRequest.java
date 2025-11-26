@@ -17,8 +17,20 @@ public class EditAddressRequest {
     @NotBlank
     private String address;
 
+     @NotNull
+    private Long lat;
+
+    @NotNull
+    private Long lng;
+
+    @NotBlank
+    private String label;
+
     public Long getId() { return id; }
     public String getName() { return name; }
     public String getPhone() { return phone; }
     public String getAddress() { return address; }
+    public Long getLat() { return lat; }
+    public Long getLng() { return lng; }
+    public String getLabel() { return label; }
 }

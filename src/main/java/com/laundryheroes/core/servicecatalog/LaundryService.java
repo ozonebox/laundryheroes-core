@@ -26,6 +26,10 @@ public class LaundryService {
     @Column(nullable = false, length = 20)
     private Category category;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = true, length = 50)
+    private Speed speed;
+
     @Column(nullable = false)
     private double price;
 
