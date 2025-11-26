@@ -9,6 +9,7 @@ import java.util.Optional;
 public interface AddressRepository extends JpaRepository<Address, Long> {
 
     List<Address> findByUser(User user);
+    List<Address> findByUserAndStatus(User user, String status);
 
     Optional<Address> findByIdAndUser(Long id, User user);
 

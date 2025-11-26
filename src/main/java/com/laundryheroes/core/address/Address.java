@@ -37,6 +37,9 @@ public class Address {
 
     private boolean isDefault;
 
+    @NotBlank
+    private String status = "ACTIVE";
+
     public Long getId() { return id; }
     public User getUser() { return user; }
     public String getName() { return name; }
@@ -46,6 +49,9 @@ public class Address {
     public Long getLng() { return lng; }
     public Long getLat() { return lat; }
     public String getLabel() { return label; }
+    public String getStatus() { return status; }
+    
+
 
     public void setUser(User user) { this.user = user; }
     public void setName(String name) { this.name = name; }
@@ -55,4 +61,5 @@ public class Address {
     public void setLong(Long lng) { this.lng = lng; }
     public void setLat(Long lat) { this.lat = lat; }
     public void setLabel(String label) { this.label = label; }
+    public void setStatus(String status) { this.status = status; }
 }

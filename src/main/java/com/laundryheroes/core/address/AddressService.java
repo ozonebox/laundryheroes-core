@@ -39,7 +39,7 @@ public class AddressService {
         Address saved = addressRepository.save(address);
 
         return responseFactory.success(ResponseCode.ADDRESS_SUCCESS,
-                new AddressResponse(saved.getId(), saved.getName(), saved.getPhone(), saved.getAddress(), saved.isDefault(),saved.getLat(),saved.getLng(),saved.getLabel())
+                new AddressResponse(saved.getId(), saved.getName(), saved.getPhone(), saved.getAddress(), saved.isDefault(),saved.getLat(),saved.getLng(),saved.getLabel(),saved.getStatus())
         );
     }
 
@@ -65,7 +65,7 @@ public class AddressService {
         Address saved = addressRepository.save(address);
 
         return responseFactory.success(ResponseCode.ADDRESS_EDIT_SUCCESS,
-                new AddressResponse(saved.getId(), saved.getName(), saved.getPhone(), saved.getAddress(), saved.isDefault(),saved.getLat(),saved.getLng(),saved.getLabel())
+                new AddressResponse(saved.getId(), saved.getName(), saved.getPhone(), saved.getAddress(), saved.isDefault(),saved.getLat(),saved.getLng(),saved.getLabel(),saved.getStatus())
         );
     }
 
@@ -77,7 +77,15 @@ public class AddressService {
             return responseFactory.error(ResponseCode.ADDRESS_NOT_FOUND);
         }
 
-        addressRepository.deleteByIdAndUser(id, user);
+        Address address=addressRepository.findByIdAndUser(id,user)
+                .filter(a -> a.getUser().getId().equals(user.getId()))
+                .orElse(null);
+
+        if (address == null) {
+            return responseFactory.error(ResponseCode.ADDRESS_NOT_FOUND);
+        }
+        address.setStatus("DELETED");
+        addressRepository.save(address);
 
         return responseFactory.success(ResponseCode.ADDRESS_DELETE_SUCCESS, null);
     }
@@ -108,7 +116,7 @@ public class AddressService {
     // List
     public ApiResponse<List<AddressResponse>> list(User user) {
 
-        List<AddressResponse> items = addressRepository.findByUser(user)
+        List<AddressResponse> items = addressRepository.findByUserAndStatus(user, "ACTIVE")
                 .stream()
                 .map(a -> new AddressResponse(
                         a.getId(),
@@ -118,7 +126,8 @@ public class AddressService {
                         a.isDefault(),
                         a.getLat(),
                         a.getLng(),
-                        a.getLabel()
+                        a.getLabel(),
+                        a.getStatus()
                 ))
                 .toList();
 

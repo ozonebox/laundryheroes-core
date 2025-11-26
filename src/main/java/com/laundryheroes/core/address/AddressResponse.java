@@ -10,8 +10,9 @@ public class AddressResponse {
     private final Long lat;
     private final Long lng;
     private final String label;
+    private final String status;
 
-    public AddressResponse(Long id, String name, String phone, String address, boolean defaultAddress,Long lat, Long lng, String label) {
+    public AddressResponse(Long id, String name, String phone, String address, boolean defaultAddress,Long lat, Long lng, String label,String status) {
         this.id = id;
         this.name = name;
         this.phone = phone;
@@ -20,6 +21,7 @@ public class AddressResponse {
         this.lat = lat;
         this.lng = lng;
         this.label = label;
+        this.status = status;
     }
 
     public AddressResponse(Address address) {
@@ -31,6 +33,7 @@ public class AddressResponse {
         this.lat = address.getLat();
         this.lng = address.getLng();
         this.label = address.getLabel();
+         this.status = address.getStatus();
     }
 
     public Long getId() { return id; }
@@ -41,4 +44,5 @@ public class AddressResponse {
     public Long getLat() { return lat; }
     public Long getLng() { return lng; }
     public String getLabel() { return label; }
+    public String getStatus() { return status; }
 }
