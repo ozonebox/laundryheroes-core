@@ -2,7 +2,9 @@
 
 package com.laundryheroes.core.account;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 
@@ -11,12 +13,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.laundryheroes.core.address.AddressService;
+import com.laundryheroes.core.auth.RefreshTokenService;
 import com.laundryheroes.core.auth.UserResponse;
 import com.laundryheroes.core.common.ApiResponse;
 import com.laundryheroes.core.common.ResponseCode;
 import com.laundryheroes.core.common.ResponseFactory;
-import com.laundryheroes.core.info.SupportMetaResponse;
 import com.laundryheroes.core.info.SupportService;
+import com.laundryheroes.core.notification.NotificationCategory;
+import com.laundryheroes.core.notification.NotificationLogResponse;
+import com.laundryheroes.core.notification.NotificationLogService;
+import com.laundryheroes.core.notification.NotificationPreferenceDto;
+import com.laundryheroes.core.notification.NotificationPreferenceService;
+import com.laundryheroes.core.notification.NotificationPublisher;
+import com.laundryheroes.core.notification.NotificationTemplate;
 import com.laundryheroes.core.order.OrderService;
 import com.laundryheroes.core.servicecatalog.LaundryServiceService;
 import com.laundryheroes.core.servicecatalog.PresetService;
@@ -36,6 +45,10 @@ public class AccountService {
     private final OrderService orderService;
     private final PresetService presetService;
     private final SupportService supportService;
+    private final NotificationPublisher notificationPublisher;
+    private final RefreshTokenService refreshTokenService;
+    private final NotificationPreferenceService prefService;
+    private final NotificationLogService notiLogService;
 
     public AccountService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
@@ -44,7 +57,11 @@ public class AccountService {
                        AddressService addressService,
                        OrderService orderService,
                        PresetService presetService,
-                       SupportService supportService) {
+                       SupportService supportService,
+                       NotificationPublisher notificationPublisher,
+                       RefreshTokenService refreshTokenService,
+                       NotificationPreferenceService prefService,
+                       NotificationLogService notiLogService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.responseFactory = responseFactory;
@@ -53,6 +70,10 @@ public class AccountService {
         this.orderService = orderService;
         this.presetService = presetService;
         this.supportService = supportService;
+        this.notificationPublisher = notificationPublisher;
+        this.refreshTokenService = refreshTokenService;
+        this.prefService = prefService;
+        this.notiLogService = notiLogService;
     }
 
      @Transactional
@@ -76,6 +97,8 @@ public class AccountService {
         ApiResponse<?> orderList =orderService.userOrders(user);
         ApiResponse<?> presetList =presetService.getPresetServices();
         ApiResponse<?> supportInfo =supportService.getSupportInfo();
+        List<NotificationPreferenceDto> notificationPref =prefService.getPreferencesForUser(user);
+        List<NotificationLogResponse> myPushNotifications = notiLogService.getMyLatestPushNotifications(user);
         UserResponse data = UserResponse.builder()
                 .id(user.getId())
                 .email(user.getEmail())
@@ -83,14 +106,19 @@ public class AccountService {
                 .lastName(user.getLastName())
                 .gender(user.getGender())
                 .profileStatus(user.getProfileStatus())
+                .role(user.getRole())
+                .serviceFee(0.00)
+                .devliiveryFee(0.00)
                 .build();
-
         return responseFactory.success(ResponseCode.SUCCESS, data)
         .addField("laundryServicesList", laundryServicesList)
         .addField("addressList", addressList)
         .addField("ordersList", orderList)
         .addField("presetList", presetList)
-        .addField("supportInfo", supportInfo);
+        .addField("supportInfo", supportInfo)
+        .addField("notificationPref", responseFactory.success(ResponseCode.SUCCESS, notificationPref))
+        .addField("myPushNotifications", responseFactory.success(ResponseCode.SUCCESS, myPushNotifications));
+        
     }
 
 
@@ -160,7 +188,15 @@ public class AccountService {
         user.setLastFailedAt(null);
 
         userRepository.save(user);
-
+        refreshTokenService.revokeAllForUser(user);
+        notificationPublisher.notifyUser(
+            user,
+            NotificationCategory.SYSTEM_ALERT,
+            NotificationTemplate.PASSWORD_CHANGED,
+            Map.of(
+                "email", user.getEmail()
+            )
+        );
         UserResponse data = UserResponse.builder()
                 .id(user.getId())
                 .email(user.getEmail())

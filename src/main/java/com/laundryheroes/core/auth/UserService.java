@@ -1,6 +1,8 @@
 package com.laundryheroes.core.auth;
 
 import java.time.Instant;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -9,10 +11,17 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.laundryheroes.core.address.AddressResponse;
+import com.laundryheroes.core.address.AddressService;
 import com.laundryheroes.core.common.ApiResponse;
 import com.laundryheroes.core.common.ResponseCode;
 import com.laundryheroes.core.common.ResponseFactory;
 import com.laundryheroes.core.email.EmailService;
+import com.laundryheroes.core.notification.NotificationCategory;
+import com.laundryheroes.core.notification.NotificationPublisher;
+import com.laundryheroes.core.notification.NotificationTemplate;
+import com.laundryheroes.core.order.OrderItemResponse;
+import com.laundryheroes.core.order.OrderResponse;
 import com.laundryheroes.core.user.ProfileStatus;
 import com.laundryheroes.core.user.User;
 import com.laundryheroes.core.user.UserRepository;
@@ -29,16 +38,24 @@ public class UserService {
     private final EmailService emailService;
     private final JwtService jwtService;
     private final RefreshTokenService refreshTokenService;
+    private final NotificationPublisher notificationPublisher;
+    private final AddressService addressService;
+
 
     public UserService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
-                       ResponseFactory responseFactory,EmailService emailService,JwtService jwtService,RefreshTokenService refreshTokenService) {
+                       ResponseFactory responseFactory,EmailService emailService,JwtService jwtService,
+                       RefreshTokenService refreshTokenService,
+                       NotificationPublisher notificationPublisher,
+                       AddressService addressService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.responseFactory = responseFactory;
         this.emailService = emailService;
         this.jwtService = jwtService;
         this.refreshTokenService = refreshTokenService;
+        this.notificationPublisher = notificationPublisher;
+        this.addressService = addressService;
     }
 
     @Transactional
@@ -107,12 +124,23 @@ public class UserService {
             .gender(user.getGender())
             .profileStatus(user.getProfileStatus())
             .accessToken(accessToken)
+            .role(user.getRole())
             .build();
             
             return responseFactory.success(ResponseCode.PROFILE_PENDING,data);
         }
 
         userRepository.save(user);
+        
+        notificationPublisher.notifyUser(
+            user,
+            NotificationCategory.SYSTEM_ALERT,
+            NotificationTemplate.LOGIN_NEW_DEVICE,
+            Map.of(
+                "device", "Unknown device",   // later retrieve from headers
+                "ip", "Unknown IP"
+            )
+        );
         String accessToken = jwtService.generateAccessTokenFull(user);
         RefreshToken refreshToken = refreshTokenService.create(user);
         UserResponse data = UserResponse.builder()
@@ -124,6 +152,7 @@ public class UserService {
             .profileStatus(user.getProfileStatus())
             .accessToken(accessToken)
             .refreshToken(refreshToken.getToken())
+            .role(user.getRole())
             .build();
         
 
@@ -152,8 +181,8 @@ public class UserService {
 
     String otp = String.valueOf((int) (Math.random() * 900000) + 100000);
     String authKey = UUID.randomUUID().toString();
-
-    user.setVerificationOtp(otp);
+    String otpHash = passwordEncoder.encode(otp);
+    user.setVerificationOtp(otpHash);
     user.setOtpExpiresAt(now.plusSeconds(300));
     user.setLastOtpSentAt(now);
     user.setVerificationAuthKey(authKey);
@@ -194,7 +223,12 @@ public class UserService {
             return responseFactory.error(ResponseCode.OTP_EXPIRED);
         }
 
-        if (!user.getVerificationOtp().equals(request.getOtp())) {
+        boolean otpOk = passwordEncoder.matches(
+                request.getOtp(),
+                user.getVerificationOtp()
+        );
+
+        if (!otpOk) {
             return responseFactory.error(ResponseCode.INVALID_OTP);
         }
 
@@ -209,6 +243,14 @@ public class UserService {
         user.setVerificationAuthKey(null);
 
         userRepository.save(user);
+        notificationPublisher.notifyUser(
+            user,
+            NotificationCategory.SYSTEM_ALERT,
+            NotificationTemplate.PROFILE_ACTIVATED,
+            Map.of(
+                "email", user.getEmail()
+            )
+        );
         String accessToken = jwtService.generateAccessTokenFull(user);
         RefreshToken refreshToken = refreshTokenService.create(user);
         UserResponse data = UserResponse.builder()
@@ -220,6 +262,7 @@ public class UserService {
             .profileStatus(user.getProfileStatus())
             .accessToken(accessToken)
             .refreshToken(refreshToken.getToken())
+            .role(user.getRole())
             .build();
         return responseFactory.success(ResponseCode.PROFILE_ACTIVATED, data);
     }
@@ -246,8 +289,8 @@ public class UserService {
 
         String otp = String.valueOf((int) (Math.random() * 900000) + 100000);
         String authKey = java.util.UUID.randomUUID().toString();
-
-        user.setResetOtp(otp);
+        String otpHash = passwordEncoder.encode(otp);
+        user.setResetOtp(otpHash);
         user.setResetOtpExpiresAt(now.plusSeconds(300));
         user.setResetAuthKey(authKey);
         user.setLastResetOtpSentAt(now);
@@ -303,6 +346,15 @@ public class UserService {
         user.setLastResetOtpSentAt(null);
 
         userRepository.save(user);
+        refreshTokenService.revokeAllForUser(user);
+        notificationPublisher.notifyUser(
+            user,
+            NotificationCategory.SYSTEM_ALERT,
+            NotificationTemplate.PASSWORD_CHANGED,
+            Map.of(
+                "email", user.getEmail()
+            )
+        );
         UserResponse data = UserResponse.builder()
             .id(user.getId())
             .email(user.getEmail())
@@ -358,5 +410,37 @@ public class UserService {
 
 
 
+    public ApiResponse<List<UserResponseAdmin>> allUsers() {
+        List<UserResponseAdmin> list = userRepository.findAll()
+                .stream()
+                .map(this::toResponse)
+                .toList();
+
+        return responseFactory.success(ResponseCode.SUCCESS, list);
+    }
+
+     private UserResponseAdmin toResponse(User user) {
+        return new UserResponseAdmin(
+                user.getId(),
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getGender(),
+                user.getProfileStatus(),
+                null,
+                null,
+                user.getRole(),
+                user.getCreatedAt(),
+                user.getFailedAttempts(),
+                user.getLastFailedAt(),
+                user.getOtpExpiresAt(),
+                user.getLastOtpSentAt(),
+                user.getResetOtpExpiresAt(),
+                user.getLastResetOtpSentAt(),
+                addressService.list(user).getData()
+
+        );
+        }
+    
 
 }

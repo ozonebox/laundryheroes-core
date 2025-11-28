@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 public class OrderController {
 
     private final OrderService orderService;
+    private final OrderProcessingService processingService;
 
     @PostMapping("/create")
     @PreAuthorize("hasRole('CUSTOMER')")
@@ -30,21 +31,17 @@ public class OrderController {
         return orderService.createOrder(user, request);
     }
 
-    @PostMapping("/cancel/{orderId}")
-    @PreAuthorize("hasRole('CUSTOMER')")
+   
+     @PostMapping("/cancel/{orderId}")
+    @PreAuthorize("hasAnyRole('CUSTOMER')")
     public ApiResponse<OrderResponse> cancelOrder(
             @PathVariable Long orderId,
             Authentication auth
     ) {
         User user = (User) auth.getPrincipal();
-        return orderService.cancelOrder(user, orderId);
+        return processingService.cancelOrder(user, orderId);
     }
-
-    @PostMapping("/{orderId}/accept")
-    @PreAuthorize("hasAnyRole('ADMIN','SUPERADMIN')")
-    public ApiResponse<OrderResponse> acceptOrder(@PathVariable Long orderId) {
-        return orderService.acceptOrder(orderId);
-    }
+   
 
 
 
@@ -54,4 +51,6 @@ public class OrderController {
         User user = (User) auth.getPrincipal();
         return orderService.userOrders(user);
     }
+
+   
 }

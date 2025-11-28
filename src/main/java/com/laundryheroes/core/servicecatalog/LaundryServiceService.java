@@ -1,5 +1,6 @@
 package com.laundryheroes.core.servicecatalog;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -83,8 +84,11 @@ public class LaundryServiceService {
                 .stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
-
-        return responseFactory.success(ResponseCode.SUCCESS, list);
+        HashMap<String, Object> charges = new HashMap<>();
+        charges.put("serviceFee", 0.00);
+        charges.put("deliveryFee", 0.00);
+        return responseFactory.success(ResponseCode.SUCCESS, list)
+        .addField("charges", responseFactory.success(ResponseCode.SUCCESS, charges));
     }
 
     

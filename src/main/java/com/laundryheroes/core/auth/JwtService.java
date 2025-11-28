@@ -99,6 +99,9 @@ public class JwtService {
         Claims claims = getClaims(token);
         return "REFRESH".equals(claims.get("type"));
     }
+    public boolean isAccessTokenExpired(String token) {
+    return getClaims(token).getExpiration().before(new Date());
+    }
 
     private Claims getClaims(String token) {
         return Jwts.parserBuilder()

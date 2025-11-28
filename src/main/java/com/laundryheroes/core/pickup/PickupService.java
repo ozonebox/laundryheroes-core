@@ -50,6 +50,7 @@ public class PickupService {
 
         order.setPickup(pickup);
         order.setStatus(OrderStatus.PICKING_UP);
+        orderRepo.save(order);
 
         return responseFactory.success(ResponseCode.SUCCESS, toResponse(pickup));
     }

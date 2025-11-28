@@ -1,0 +1,18 @@
+package com.laundryheroes.core.notification;
+
+public enum NotificationTemplate {
+    ORDER_CREATED,
+    ORDER_ACCEPTED,
+    ORDER_PICKUP_STARTED,
+    ORDER_RECEIVED,
+    ORDER_IN_PROGRESS,
+    ORDER_READY,
+    ORDER_OUT_FOR_DELIVERY,
+    ORDER_COMPLETED,
+    ORDER_CANCELLED,
+    LOGIN_NEW_DEVICE,
+    PASSWORD_CHANGED,
+    PROFILE_ACTIVATED,
+    ADDRESS_ADDED,
+    ADMIN_BROADCAST
+}

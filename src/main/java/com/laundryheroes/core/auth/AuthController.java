@@ -40,10 +40,34 @@ public class AuthController {
 
             return ResponseEntity.status(200).body(response);
         }
+         if (!response.getResponseCode().equals(ResponseCode.SUCCESS.code())) {
+            return ResponseEntity.ok(response);
+        }
 
+        UserResponse data = response.getData();
+
+        ResponseCookie newAccess = ResponseCookie.from("ACCESS_TOKEN", data.getAccessToken())
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .sameSite("Strict")
+                .maxAge(86400)
+                .build();
+
+        ResponseCookie newRefresh = ResponseCookie.from("REFRESH_TOKEN", data.getRefreshToken())
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .sameSite("Strict")
+                .maxAge(2592000)
+                .build();
 
         return ResponseEntity.ok()
+                .header("Set-Cookie", newAccess.toString())
+                .header("Set-Cookie", newRefresh.toString())
                 .body(response);
+
+
     }
 
     @PostMapping("/verify-email")

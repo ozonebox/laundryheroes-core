@@ -13,6 +13,15 @@ public class CreateOrderRequest {
     private Long addressId;
 
     @NotNull
+    private Long deliveryAddressId;
+
+    @NotNull
+    private String serviceSpeed;
+
+    @NotNull
+    private String paymentMethod;
+
+    @NotNull
     private Instant pickupTimeRequested;
 
     @NotNull

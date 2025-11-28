@@ -35,6 +35,9 @@ public class User {
     @Column(length = 20)
     private String gender;
 
+    @Column(length = 15)
+    private String phoneNumber;
+
     @Column(length = 64)
     private String verificationAuthKey;
 
@@ -55,7 +58,7 @@ public class User {
     @Column
     private Instant lastFailedAt;
 
-    @Column(length = 10)
+    @Column(length = 255)
     private String verificationOtp;
 
     @Column

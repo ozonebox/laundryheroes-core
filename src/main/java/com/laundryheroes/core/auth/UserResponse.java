@@ -1,6 +1,7 @@
 package com.laundryheroes.core.auth;
 
 import com.laundryheroes.core.user.ProfileStatus;
+import com.laundryheroes.core.user.UserRole;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,4 +20,7 @@ public class UserResponse {
     private ProfileStatus profileStatus;
     private String accessToken;
     private String refreshToken;
+    private UserRole role;
+    private double serviceFee;
+    private double devliiveryFee;
 }

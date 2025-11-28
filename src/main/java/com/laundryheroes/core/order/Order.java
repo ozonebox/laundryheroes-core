@@ -9,6 +9,7 @@ import com.laundryheroes.core.pickup.PickupRequest;
 import com.laundryheroes.core.user.User;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -28,9 +29,18 @@ public class Order {
     @ManyToOne(optional = false)
     private Address address;
 
+    @ManyToOne(optional = false)
+    private Address deliveryAddress;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 40)
     private OrderStatus status = OrderStatus.PENDING;
+
+    @Column(nullable = false)
+    private String serviceSpeed;
+
+    @Column(nullable = false)
+    private String paymentMethod;
 
     @Column(nullable = false)
     private double totalAmount;

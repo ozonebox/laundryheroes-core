@@ -26,7 +26,7 @@ public class DeliveryRequest {
     @ManyToOne(optional = false)
     private Address deliveryAddress;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     private User assignedDriver;
 
     @Enumerated(EnumType.STRING)

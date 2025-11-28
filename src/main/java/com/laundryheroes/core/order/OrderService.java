@@ -2,6 +2,7 @@ package com.laundryheroes.core.order;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,9 +10,13 @@ import org.springframework.transaction.annotation.Transactional;
 import com.laundryheroes.core.address.Address;
 import com.laundryheroes.core.address.AddressRepository;
 import com.laundryheroes.core.address.AddressResponse;
+import com.laundryheroes.core.auth.UserResponse;
 import com.laundryheroes.core.common.ApiResponse;
 import com.laundryheroes.core.common.ResponseCode;
 import com.laundryheroes.core.common.ResponseFactory;
+import com.laundryheroes.core.notification.NotificationCategory;
+import com.laundryheroes.core.notification.NotificationPublisher;
+import com.laundryheroes.core.notification.NotificationTemplate;
 import com.laundryheroes.core.servicecatalog.LaundryService;
 import com.laundryheroes.core.servicecatalog.LaundryServiceRepository;
 import com.laundryheroes.core.user.User;
@@ -26,20 +31,33 @@ public class OrderService {
     private final AddressRepository addressRepository;
     private final LaundryServiceRepository laundryServiceRepository;
     private final ResponseFactory responseFactory;
+    private final NotificationPublisher notificationPublisher;
 
     @Transactional
     public ApiResponse<OrderResponse> createOrder(User user, CreateOrderRequest request) {
 
         Address address = addressRepository.findByIdAndUser(request.getAddressId(), user)
                 .orElse(null);
-
         if (address == null) {
             return responseFactory.error(ResponseCode.ADDRESS_NOT_FOUND);
         }
+        Address deliveryAddress = address;
+        if(request.getDeliveryAddressId() != request.getAddressId()){
+            deliveryAddress = addressRepository.findByIdAndUser(request.getDeliveryAddressId(), user)
+                    .orElse(null);
+            if (deliveryAddress == null) {
+                return responseFactory.error(ResponseCode.ADDRESS_NOT_FOUND);
+            }
+        }
+        
+        
 
         Order order = new Order();
         order.setUser(user);
         order.setAddress(address);
+        order.setDeliveryAddress(deliveryAddress);
+        order.setPaymentMethod(request.getPaymentMethod());
+        order.setServiceSpeed(request.getServiceSpeed());
         order.setStatus(OrderStatus.PENDING);
         order.setPickupTimeRequested(request.getPickupTimeRequested());
 
@@ -71,47 +89,20 @@ public class OrderService {
         order.setTotalAmount(total);
 
         orderRepository.save(order);
+        notificationPublisher.notifyUser(
+        user,
+        NotificationCategory.ORDER_UPDATE,
+        NotificationTemplate.ORDER_CREATED,
+        Map.of(
+            "orderId", order.getId(),
+            "total", order.getTotalAmount()
+        )
+    );
 
         return responseFactory.success(ResponseCode.ORDER_SUCCESS, toResponse(order));
     }
 
-    @Transactional
-    public ApiResponse<OrderResponse> acceptOrder(Long orderId) {
-        Order order = orderRepository.findById(orderId).orElse(null);
-        if (order == null) {
-            return responseFactory.error(ResponseCode.ORDER_NOT_FOUND);
-        }
-
-        if (order.getStatus() != OrderStatus.PENDING) {
-            return responseFactory.error(ResponseCode.INVALID_ORDER_STATUS);
-        }
-
-        order.setStatus(OrderStatus.ACCEPTED);
-        orderRepository.save(order);
-
-        return responseFactory.success(ResponseCode.SUCCESS, toResponse(order));
-    }
-
-    @Transactional
-    public ApiResponse<OrderResponse> cancelOrder(User user,Long orderId) {
-        // Find order
-        Order order = orderRepository.findByIdAndUser(orderId,user).orElse(null);
-        if (order == null) {
-            return responseFactory.error(ResponseCode.ORDER_NOT_FOUND);
-        }
-
-        // Only allow cancel when still pending
-        if (order.getStatus() != OrderStatus.PENDING) {
-            return responseFactory.error(ResponseCode.INVALID_ORDER_STATUS);
-        }
-
-        // Set status to CANCELLED
-        order.setStatus(OrderStatus.CANCELLED);
-        orderRepository.save(order);
-
-        return responseFactory.success(ResponseCode.SUCCESS, toResponse(order));
-    }
-
+    
 
     public ApiResponse<List<OrderResponse>> userOrders(User user) {
         List<OrderResponse> list = orderRepository.findByUser(user)
@@ -122,8 +113,17 @@ public class OrderService {
         return responseFactory.success(ResponseCode.SUCCESS, list);
     }
 
-    private OrderResponse toResponse(Order order) {
+   
 
+    private OrderResponse toResponse(Order order) {
+        UserResponse data = UserResponse.builder()
+            .id(order.getUser().getId())
+            .email(order.getUser().getEmail())
+            .firstName(order.getUser().getFirstName())
+            .lastName(order.getUser().getLastName())
+            .gender(order.getUser().getGender())
+            .profileStatus(order.getUser().getProfileStatus())
+            .build();
         List<OrderItemResponse> items = order.getItems()
                 .stream()
                 .map(i -> new OrderItemResponse(
@@ -139,11 +139,15 @@ public class OrderService {
 
         return new OrderResponse(
                 order.getId(),
+                data,
                 new AddressResponse(order.getAddress()),
+                new AddressResponse(order.getDeliveryAddress()),
                 order.getStatus(),
                 order.getTotalAmount(),
-                100.00,
-                100.00,
+                0.00,
+                0.00,
+                order.getPaymentMethod(),
+                order.getServiceSpeed(),   
                 order.getCreatedAt(),
                 order.getPickupTimeRequested(),
                 items,
