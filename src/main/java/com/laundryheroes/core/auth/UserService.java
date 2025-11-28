@@ -11,18 +11,16 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.laundryheroes.core.address.AddressResponse;
 import com.laundryheroes.core.address.AddressService;
 import com.laundryheroes.core.common.ApiResponse;
 import com.laundryheroes.core.common.DeviceInfoUtil;
+import com.laundryheroes.core.common.GeoIpService;
 import com.laundryheroes.core.common.ResponseCode;
 import com.laundryheroes.core.common.ResponseFactory;
 import com.laundryheroes.core.email.EmailService;
 import com.laundryheroes.core.notification.NotificationCategory;
 import com.laundryheroes.core.notification.NotificationPublisher;
 import com.laundryheroes.core.notification.NotificationTemplate;
-import com.laundryheroes.core.order.OrderItemResponse;
-import com.laundryheroes.core.order.OrderResponse;
 import com.laundryheroes.core.user.ProfileStatus;
 import com.laundryheroes.core.user.User;
 import com.laundryheroes.core.user.UserRepository;
@@ -41,14 +39,18 @@ public class UserService {
     private final RefreshTokenService refreshTokenService;
     private final NotificationPublisher notificationPublisher;
     private final AddressService addressService;
+    private final GeoIpService geoIpService;
 
 
     public UserService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
-                       ResponseFactory responseFactory,EmailService emailService,JwtService jwtService,
+                       ResponseFactory responseFactory,
+                       EmailService emailService,
+                       JwtService jwtService,
                        RefreshTokenService refreshTokenService,
                        NotificationPublisher notificationPublisher,
-                       AddressService addressService) {
+                       AddressService addressService,
+                       GeoIpService geoIpService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.responseFactory = responseFactory;
@@ -57,6 +59,7 @@ public class UserService {
         this.refreshTokenService = refreshTokenService;
         this.notificationPublisher = notificationPublisher;
         this.addressService = addressService;
+        this.geoIpService = geoIpService;
     }
 
     @Transactional
@@ -134,14 +137,18 @@ public class UserService {
         }
 
         userRepository.save(user);
-        
+        String deviceLabel = DeviceInfoUtil.buildDeviceLabel(userAgent);
+        String country = geoIpService.resolveCountry(ipAddress);
+        String safeIp = (ipAddress != null && !ipAddress.isBlank()) ? ipAddress : "Unknown IP";
+
         notificationPublisher.notifyUser(
             user,
             NotificationCategory.SYSTEM_ALERT,
             NotificationTemplate.LOGIN_NEW_DEVICE,
             Map.of(
-                "device", DeviceInfoUtil.buildDeviceLabel(userAgent),
-                "ip", ipAddress != null ? ipAddress : "Unknown IP"
+                "device", deviceLabel,
+                "ip", safeIp,
+                "country", country
             )
         );
         String accessToken = jwtService.generateAccessTokenFull(user);
