@@ -31,9 +31,10 @@ public class AuthController {
     }
 
    @PostMapping("/login")
-    public ResponseEntity<ApiResponse<?>> login(@RequestBody @Valid LoginRequest request) {
-
-        ApiResponse<UserResponse> response = userService.login(request);
+    public ResponseEntity<ApiResponse<?>> login(@RequestBody @Valid LoginRequest request,HttpServletRequest httpRequest) {
+        String ip = extractClientIp(httpRequest);
+        String userAgent = httpRequest.getHeader("User-Agent");
+        ApiResponse<UserResponse> response = userService.login(request,ip,userAgent);
 
         if (!response.getResponseCode().equals(ResponseCode.LOGIN_SUCCESS.code()) &&
             !response.getResponseCode().equals(ResponseCode.PROFILE_PENDING.code())) {
@@ -147,6 +148,22 @@ public class AuthController {
                 .build();
     }
 
+    private String extractClientIp(HttpServletRequest request) {
+        // If you're behind a proxy / load balancer, you'll typically get this header
+        String forwarded = request.getHeader("X-Forwarded-For");
+        if (forwarded != null && !forwarded.isBlank()) {
+            // X-Forwarded-For can be "client, proxy1, proxy2"
+            return forwarded.split(",")[0].trim();
+        }
+
+        String realIp = request.getHeader("X-Real-IP");
+        if (realIp != null && !realIp.isBlank()) {
+            return realIp;
+        }
+
+        // Fallback to direct remote address
+        return request.getRemoteAddr();
+    }
     private String extractCookie(HttpServletRequest request, String name) {
         if (request.getCookies() == null) return null;
 

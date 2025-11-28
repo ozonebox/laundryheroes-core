@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.laundryheroes.core.address.AddressResponse;
 import com.laundryheroes.core.address.AddressService;
 import com.laundryheroes.core.common.ApiResponse;
+import com.laundryheroes.core.common.DeviceInfoUtil;
 import com.laundryheroes.core.common.ResponseCode;
 import com.laundryheroes.core.common.ResponseFactory;
 import com.laundryheroes.core.email.EmailService;
@@ -81,7 +82,9 @@ public class UserService {
     }
 
     @Transactional
-    public ApiResponse<UserResponse> login(LoginRequest request) {
+    public ApiResponse<UserResponse> login(LoginRequest request,
+                                       String ipAddress,
+                                       String userAgent) {
 
         Optional<User> optional = userRepository.findByEmail(request.getEmail());
         if (optional.isEmpty()) {
@@ -137,8 +140,8 @@ public class UserService {
             NotificationCategory.SYSTEM_ALERT,
             NotificationTemplate.LOGIN_NEW_DEVICE,
             Map.of(
-                "device", "Unknown device",   // later retrieve from headers
-                "ip", "Unknown IP"
+                "device", DeviceInfoUtil.buildDeviceLabel(userAgent),
+                "ip", ipAddress != null ? ipAddress : "Unknown IP"
             )
         );
         String accessToken = jwtService.generateAccessTokenFull(user);
