@@ -5,27 +5,35 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
 
-import java.io.InputStream;
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 
 @Configuration
 @RequiredArgsConstructor
-@EnableConfigurationProperties(FcmProperties.class)
 public class FirebaseInitializer {
 
     private final FcmProperties props;
 
     @PostConstruct
     public void init() {
-        try (InputStream is =
-                     new ClassPathResource(props.getServiceAccountPath())
-                             .getInputStream()) {
+        try {
+            String serviceAccountJson = props.getServiceAccountJson();
+
+            if (serviceAccountJson == null || serviceAccountJson.isBlank()) {
+                throw new IllegalStateException("Firebase service account JSON is not set");
+            }
+
+            GoogleCredentials credentials =
+                    GoogleCredentials.fromStream(
+                            new ByteArrayInputStream(
+                                    serviceAccountJson.getBytes(StandardCharsets.UTF_8)
+                            )
+                    );
 
             FirebaseOptions options = FirebaseOptions.builder()
-                    .setCredentials(GoogleCredentials.fromStream(is))
+                    .setCredentials(credentials)
                     .build();
 
             if (FirebaseApp.getApps().isEmpty()) {
@@ -34,8 +42,8 @@ public class FirebaseInitializer {
 
         } catch (Exception e) {
             throw new IllegalStateException(
-                "Failed to initialize Firebase. Check service account path.",
-                e
+                    "Failed to initialize Firebase Admin SDK",
+                    e
             );
         }
     }

@@ -1,7 +1,9 @@
 package com.laundryheroes.core.notification;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
+@Component
 @ConfigurationProperties(prefix = "fcm")
 public class FcmProperties {
 
@@ -12,11 +14,23 @@ public class FcmProperties {
      */
     private String serviceAccountPath;
 
+    private String serviceAccountJson;
+
     public String getServiceAccountPath() {
         return serviceAccountPath;
     }
 
     public void setServiceAccountPath(String serviceAccountPath) {
         this.serviceAccountPath = serviceAccountPath;
+    }
+
+   
+
+    public String getServiceAccountJson() {
+        return serviceAccountJson;
+    }
+
+    public void setServiceAccountJson(String serviceAccountJson) {
+        this.serviceAccountJson = serviceAccountJson;
     }
 }

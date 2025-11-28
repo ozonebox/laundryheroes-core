@@ -18,6 +18,7 @@ services:
     container_name: laundryheroes-app
     environment:
       SPRING_PROFILES_ACTIVE: "local"
+      FIREBASE_SERVICE_ACCOUNT_JSON: ${FIREBASE_SERVICE_ACCOUNT_JSON}
     ports:
       - "8080:8080"
     depends_on:
