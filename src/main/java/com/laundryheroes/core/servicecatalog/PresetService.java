@@ -19,91 +19,137 @@ public class PresetService {
     public ApiResponse<List<PresetResponse>> getPresetServices() {
 
         List<PresetResponse> list = List.of(
+
+            // 1️⃣ Men's thob weekly care
             new PresetResponse(
                 1,
-                "Basic Shirt Package",
-                "Weekly shirt wash & iron package.",
+                "Men's Thob Weekly",
+                "Weekly wash & press for thobs plus ghotra pressing.",
                 "MEN",
                 true,
                 List.of(
-                    new PresetItem(2, 5),
-                    new PresetItem(1, 5)
+                    // THOB – WASH_PRESS NORMAL (id=4) ×5
+                    new PresetItem(4, 5),
+                    // GHOTRA – PRESS NORMAL (id=18) ×5
+                    new PresetItem(18, 5)
                 ),
-                6000
+                45 // 5×5 + 5×4 = 25 + 20 = 45
             ),
+
+            // 2️⃣ Men's occasion bisht & jacket
             new PresetResponse(
                 2,
-                "Premium Suit Care",
-                "Professional dry clean & ironing for suits.",
+                "Men's Occasion Pack",
+                "Full care for bisht, jacket and matching ghotra.",
                 "MEN",
                 true,
                 List.of(
-                    new PresetItem(21, 2),
-                    new PresetItem(19, 2)
+                    // BISHT – DRY_CLEAN NORMAL (id=20) ×1
+                    new PresetItem(20, 1),
+                    // JACKET – DRY_CLEAN NORMAL (id=26) ×1
+                    new PresetItem(26, 1),
+                    // GHOTRA – DRY_CLEAN NORMAL (id=14) ×1
+                    new PresetItem(14, 1),
+                    // THOB_WOOL – DRY_CLEAN NORMAL (id=8) ×1
+                    new PresetItem(8, 1)
                 ),
-                7600
+                68 // 30 + 15 + 8 + 15 = 68
             ),
+
+            // 3️⃣ Women's abaya & blouse weekly
             new PresetResponse(
                 3,
-                "Family Clothing Pack",
-                "A mixed bundle for regular weekly laundry.",
-                "FAMILY",
-                true,
-                List.of(
-                    new PresetItem(2, 6),
-                    new PresetItem(8, 6),
-                    new PresetItem(37, 6)
-                ),
-                12600
-            ),
-            new PresetResponse(
-                4,
-                "Women's Premium Dress Care",
-                "Dry cleaning and ironing for delicate dresses.",
+                "Women's Everyday Pack",
+                "Regular wash & press for abayas and blouses.",
                 "WOMEN",
                 true,
                 List.of(
-                    new PresetItem(51, 3),
-                    new PresetItem(49, 3)
+                    // ABAYA – WASH_PRESS NORMAL (id=34) ×4
+                    new PresetItem(34, 4),
+                    // BLOUSE – WASH_PRESS NORMAL (id=40) ×4
+                    new PresetItem(40, 4)
                 ),
-                8400
+                80 // 4×15 + 4×5 = 60 + 20 = 80
             ),
+
+            // 4️⃣ Wedding dress full care
             new PresetResponse(
-                5,
-                "Home Essentials Pack",
-                "Laundry care for towels and bed sheets.",
-                "HOME",
+                4,
+                "Wedding Dress Full Care",
+                "Professional dry clean and pressing for one wedding dress.",
+                "WOMEN",
                 true,
                 List.of(
-                    new PresetItem(104, 4),
-                    new PresetItem(109, 3)
+                    // WEDDING_DRESS – DRY_CLEAN NORMAL (id=44) ×1
+                    new PresetItem(44, 1),
+                    // WEDDING_DRESS – PRESS NORMAL (id=46) ×1
+                    new PresetItem(46, 1)
                 ),
-                6100
+                300 // 200 + 100 = 300
             ),
+
+            // 5️⃣ Sari party pack
+            new PresetResponse(
+                5,
+                "Sari Party Pack",
+                "Dry clean and press for multiple special saris.",
+                "WOMEN",
+                true,
+                List.of(
+                    // SPECIAL_SARI – DRY_CLEAN NORMAL (id=48) ×3
+                    new PresetItem(48, 3),
+                    // SPECIAL_SARI – PRESS NORMAL (id=52) ×3
+                    new PresetItem(52, 3)
+                ),
+                156 // 3×40 + 3×12 = 120 + 36 = 156
+            ),
+
+            // 6️⃣ Kids school uniforms
             new PresetResponse(
                 6,
-                "Kids School Pack",
-                "Weekly wash & dry for school uniforms.",
+                "Kids School Uniform Pack",
+                "Weekly wash & press for children's school uniforms.",
                 "KIDS",
                 true,
                 List.of(
-                    new PresetItem(74, 5),
-                    new PresetItem(80, 5)
+                    // THOB (KIDS) – WASH_PRESS NORMAL (id=56) ×5
+                    new PresetItem(56, 5),
+                    // DRESS (KIDS) – WASH_PRESS NORMAL (id=62) ×3
+                    new PresetItem(62, 3)
                 ),
-                6250
+                79 // 5×5 + 3×18 = 25 + 54 = 79
             ),
+
+            // 7️⃣ Home bedding refresh
             new PresetResponse(
                 7,
-                "Premium Complete Care",
-                "Luxury multi-item special care treatment.",
-                "MEN",
+                "Home Bedding Refresh",
+                "Freshen bed sheets and pillows in one go.",
+                "HOME",
                 true,
                 List.of(
-                    new PresetItem(6, 3),
-                    new PresetItem(24, 3),
-                    new PresetItem(30, 3)
+                    // BED_SHEET – WASH_PRESS NORMAL (id=74) ×4
+                    new PresetItem(74, 4),
+                    // PILLOW – WASH_PRESS NORMAL (id=86) ×4
+                    new PresetItem(86, 4)
                 ),
-                24600
+                64 // 4×10 + 4×6 = 40 + 24 = 64
+            ),
+
+            // 8️⃣ Curtains & bedding combo
+            new PresetResponse(
+                8,
+                "Curtains & Bedding Combo",
+                "Deep clean for curtains plus regular sheets.",
+                "HOME",
+                true,
+                List.of(
+                    // CURTAINS_BIG – WASH_PRESS NORMAL (id=80) ×3
+                    new PresetItem(80, 3),
+                    // BED_SHEET – WASH_PRESS NORMAL (id=74) ×3
+                    new PresetItem(74, 3)
+                ),
+                99 // 3×23 + 3×10 = 69 + 30 = 99
             )
         );
 

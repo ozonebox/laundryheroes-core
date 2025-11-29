@@ -4,5 +4,5 @@ public enum Category {
     MEN,
     WOMEN,
     KIDS,
-    HOME
+    FURNITURE
 }

@@ -1,13 +1,17 @@
 package com.laundryheroes.core.servicecatalog;
 
 public enum ItemType {
-    SHIRT,
-    PANTS,
-    DRESS,
-    SHORTS,
-    SUIT,
+    GHOTRA,
+    THOB,
+    THOB_WOOL,
+    BISHT,
     JACKET,
-    TOWEL,
+    ABAYA,
+    BLOUSE,
+    WEDDING_DRESS,
+    SPECIAL_SARI,
+    DRESS,
     BED_SHEET,
-    OTHER
+    CURTAINS_BIG,
+    PILLOW,
 }
