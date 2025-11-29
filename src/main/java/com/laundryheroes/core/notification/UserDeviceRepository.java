@@ -14,6 +14,15 @@ public interface UserDeviceRepository extends JpaRepository<UserDevice, Long> {
     List<UserDevice> findByUserAndActiveTrue(User user);
 
     @Modifying
+    @Query("""
+        update UserDevice d
+        set d.active = false
+        where d.user = :user and d.platform = :platform
+          and d.active = true
+    """)
+    void deactivateAllByUserAndPlatform(@Param("user") User user, @Param("platform") String platform);
+
+    @Modifying
     @Query("update UserDevice d set d.active = false where d.deviceToken = :token")
     void deactivateByToken(@Param("token") String token);
 }

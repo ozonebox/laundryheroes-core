@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 public class PushNotificationSender implements NotificationChannelSender {
 
     private final UserDeviceRepository deviceRepo;
-    private final FcmClient fcmClient;
+    private final FcmHttpClient fcmHttpClient;
 
     @Override
     public void send(User user, String title, String body, Map<String, Object> meta) {
@@ -28,7 +28,9 @@ public class PushNotificationSender implements NotificationChannelSender {
 
         for (UserDevice device : devices) {
             try {
-                fcmClient.sendToToken(
+               log.info("Sending push to device {} (user {})",
+                        device.getId(), user.getId());
+                fcmHttpClient.sendIosPush(
                     device.getDeviceToken(),
                     title,
                     body,

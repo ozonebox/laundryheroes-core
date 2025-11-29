@@ -22,7 +22,7 @@ public class OrderController {
     private final OrderProcessingService processingService;
 
     @PostMapping("/create")
-    @PreAuthorize("hasRole('CUSTOMER')")
+    
     public ApiResponse<OrderResponse> createOrder(
             @Valid @RequestBody CreateOrderRequest request,
             Authentication auth
@@ -33,7 +33,7 @@ public class OrderController {
 
    
      @PostMapping("/cancel/{orderId}")
-    @PreAuthorize("hasAnyRole('CUSTOMER')")
+
     public ApiResponse<OrderResponse> cancelOrder(
             @PathVariable Long orderId,
             Authentication auth
@@ -46,7 +46,7 @@ public class OrderController {
 
 
     @GetMapping("/mine")
-    @PreAuthorize("hasRole('CUSTOMER')")
+    
     public ApiResponse<List<OrderResponse>> myOrders(Authentication auth) {
         User user = (User) auth.getPrincipal();
         return orderService.userOrders(user);

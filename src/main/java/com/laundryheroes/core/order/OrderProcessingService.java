@@ -102,6 +102,13 @@ public class OrderProcessingService {
             NotificationTemplate.ORDER_CANCELLED,
             Map.of("orderId", order.getId())
         );
+        realtimeService.push(
+            ResponseCode.SUCCESS.code(),
+            "Order status updated",
+            Map.of(
+                "orders", List.of(toResponse(order))
+            )
+        );
 
         return responseFactory.success(ResponseCode.SUCCESS, toResponse(order));
     }
@@ -125,6 +132,13 @@ public class OrderProcessingService {
             Map.of(
                 "orderId", order.getId(),
                 "reason", "Cancelled by admin"
+            )
+        );
+        realtimeService.push(
+            ResponseCode.SUCCESS.code(),
+            "Order status updated",
+            Map.of(
+                "orders", List.of(toResponse(order))
             )
         );
 

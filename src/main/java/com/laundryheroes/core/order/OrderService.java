@@ -20,6 +20,7 @@ import com.laundryheroes.core.notification.NotificationTemplate;
 import com.laundryheroes.core.servicecatalog.LaundryService;
 import com.laundryheroes.core.servicecatalog.LaundryServiceRepository;
 import com.laundryheroes.core.user.User;
+import com.laundryheroes.core.websocket.AdminRealtimeService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -32,6 +33,7 @@ public class OrderService {
     private final LaundryServiceRepository laundryServiceRepository;
     private final ResponseFactory responseFactory;
     private final NotificationPublisher notificationPublisher;
+    private final AdminRealtimeService realtimeService;
 
     @Transactional
     public ApiResponse<OrderResponse> createOrder(User user, CreateOrderRequest request) {
@@ -93,11 +95,19 @@ public class OrderService {
         user,
         NotificationCategory.ORDER_UPDATE,
         NotificationTemplate.ORDER_CREATED,
-        Map.of(
-            "orderId", order.getId(),
-            "total", order.getTotalAmount()
-        )
-    );
+            Map.of(
+                "orderId", order.getId(),
+                "total", order.getTotalAmount()
+                //"order", order
+            )
+        );
+        realtimeService.push(
+            ResponseCode.SUCCESS.code(),
+            "Order status updated",
+            Map.of(
+                "orders", List.of(toResponse(order))
+            )
+        );
 
         return responseFactory.success(ResponseCode.ORDER_SUCCESS, toResponse(order));
     }

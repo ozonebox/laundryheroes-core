@@ -31,6 +31,8 @@ public class UserDeviceController {
     ) {
         User user = (User) auth.getPrincipal();
 
+        deviceRepo.deactivateAllByUserAndPlatform(user,req.getPlatform());
+
         // Deactivate any previous records for this token
         deviceRepo.deactivateByToken(req.getDeviceToken());
 

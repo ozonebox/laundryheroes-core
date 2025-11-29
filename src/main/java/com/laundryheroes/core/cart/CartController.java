@@ -23,7 +23,6 @@ public class CartController {
     }
 
     @PostMapping("/add")
-    @PreAuthorize("hasRole('CUSTOMER')")
     public ApiResponse<?> add(@Valid @RequestBody CreateCartRequest request,
                               Authentication auth) {
         User user = (User) auth.getPrincipal();
@@ -33,14 +32,12 @@ public class CartController {
   
 
     @DeleteMapping("/clear")
-    @PreAuthorize("hasRole('CUSTOMER')")
     public ApiResponse<?> clear(Authentication auth) {
         User user = (User) auth.getPrincipal();
         return service.clearCart(user);
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('CUSTOMER')")
     public ApiResponse<List<CartResponse>> cart(Authentication auth) {
         User user = (User) auth.getPrincipal();
         return service.getCart(user);
