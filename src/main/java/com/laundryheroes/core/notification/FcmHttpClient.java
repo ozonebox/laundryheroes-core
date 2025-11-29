@@ -94,7 +94,7 @@ public class FcmHttpClient {
                 conn.getErrorStream().readAllBytes(),
                 StandardCharsets.UTF_8
             );
-            log.error("❌ FCM HTTP error {} → {}", status, error);
+            log.error("❌ FCM HTTP error {}→{}", status, error);
             throw new IllegalStateException(error);
         }
 
