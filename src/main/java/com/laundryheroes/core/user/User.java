@@ -67,7 +67,7 @@ public class User {
     @Column
     private Instant lastOtpSentAt;
 
-    @Column(length = 10)
+    @Column(length = 255)
     private String resetOtp;
 
     @Column
