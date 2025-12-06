@@ -176,7 +176,8 @@ public class OrderProcessingService {
                                 i.getLaundryService().getCategory(),
                                 i.getUnitPrice(),
                                 i.getQuantity(),
-                                i.getSubtotal()
+                                i.getSubtotal(),
+                                i.getLaundryService().getSpeed()
                         )).toList(),
                 order.getPickup(),
                 order.getDelivery()

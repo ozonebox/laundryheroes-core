@@ -143,7 +143,8 @@ public class OrderService {
                         i.getLaundryService().getCategory(),
                         i.getUnitPrice(),
                         i.getQuantity(),
-                        i.getSubtotal()
+                        i.getSubtotal(),
+                        i.getLaundryService().getSpeed()
                 ))
                 .toList();
 
