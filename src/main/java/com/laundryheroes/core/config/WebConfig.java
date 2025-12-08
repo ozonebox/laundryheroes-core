@@ -17,7 +17,8 @@ public class WebConfig {
                 registry.addMapping("/api/**")
                         .allowedOrigins(
                             "http://localhost:3000",
-                            "https://admin.laundryheroes.com" // your future prod admin
+                            "https://ad90.laundryheroes.com",
+                            "https://s3.us-east-1.amazonaws.com" // your future prod admin
                         )
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                         .allowedHeaders("*")
