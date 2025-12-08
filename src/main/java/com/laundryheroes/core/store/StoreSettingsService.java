@@ -29,6 +29,7 @@ public class StoreSettingsService {
 
 
     public ApiResponse<StoreSettings> get() {
+        
         StoreSettings settings = repo.findAll().stream().findFirst().orElse(null);
 
         if (settings == null) {
