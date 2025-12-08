@@ -3,6 +3,8 @@ package com.laundryheroes.core.notification;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.laundryheroes.core.user.UserRole;
+
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
@@ -17,7 +19,7 @@ public class AdminBroadcastRequest {
     @NotBlank
     private String body;
 
-    private String role; // optional filter: CUSTOMER/DRIVER/etc
+    private UserRole role; // optional filter: CUSTOMER/DRIVER/etc
     private String city; // later
 
     private Map<String, Object> meta = new HashMap<>();

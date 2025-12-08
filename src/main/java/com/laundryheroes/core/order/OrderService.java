@@ -14,11 +14,15 @@ import com.laundryheroes.core.auth.UserResponse;
 import com.laundryheroes.core.common.ApiResponse;
 import com.laundryheroes.core.common.ResponseCode;
 import com.laundryheroes.core.common.ResponseFactory;
+import com.laundryheroes.core.delivery.DeliveryResponseFull;
 import com.laundryheroes.core.notification.NotificationCategory;
 import com.laundryheroes.core.notification.NotificationPublisher;
 import com.laundryheroes.core.notification.NotificationTemplate;
+import com.laundryheroes.core.pickup.PickupResponseFull;
 import com.laundryheroes.core.servicecatalog.LaundryService;
 import com.laundryheroes.core.servicecatalog.LaundryServiceRepository;
+import com.laundryheroes.core.store.StoreSettings;
+import com.laundryheroes.core.store.StoreSettingsService;
 import com.laundryheroes.core.user.User;
 import com.laundryheroes.core.websocket.AdminRealtimeService;
 
@@ -34,10 +38,15 @@ public class OrderService {
     private final ResponseFactory responseFactory;
     private final NotificationPublisher notificationPublisher;
     private final AdminRealtimeService realtimeService;
+    private final StoreSettingsService storeSettingsService;
+
 
     @Transactional
     public ApiResponse<OrderResponse> createOrder(User user, CreateOrderRequest request) {
-
+        StoreSettings settings = storeSettingsService.getRaw();
+        if (!settings.isOpen()) {
+            return responseFactory.error(ResponseCode.STORE_CLOSED);
+        }
         Address address = addressRepository.findByIdAndUser(request.getAddressId(), user)
                 .orElse(null);
         if (address == null) {
@@ -162,8 +171,9 @@ public class OrderService {
                 order.getCreatedAt(),
                 order.getPickupTimeRequested(),
                 items,
-                order.getPickup(),
-                order.getDelivery()
+                order.getPickup()!=null? new PickupResponseFull(order.getPickup().getId(),order.getId(),order.getPickup().getPickupAddress().getId(),order.getPickup().getStatus(),order.getPickup().getScheduledFor(),order.getPickup().getCreatedAt(),new UserResponse(order.getPickup().getAssignedDriver())):new PickupResponseFull(),
+                order.getDelivery()!=null?new DeliveryResponseFull(order.getDelivery().getId(),order.getId(),order.getDelivery().getDeliveryAddress().getId(),order.getDelivery().getStatus(),order.getDelivery().getCreatedAt(),new UserResponse(order.getDelivery().getAssignedDriver())): new DeliveryResponseFull()
+        
         );
     }
 }

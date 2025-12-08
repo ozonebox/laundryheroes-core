@@ -418,6 +418,18 @@ public class UserService {
         return responseFactory.success(ResponseCode.LOGOUT_SUCCESS, null);
     }
 
+  @Transactional(readOnly = true)
+public User getUserEntityById(Long id) {
+    return userRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("User not found with id " + id));
+}
+
+// If you still want the ApiResponse version for controllers:
+@Transactional(readOnly = true)
+public ApiResponse<UserResponse> getUserByIdResponse(Long id) {
+    User user = getUserEntityById(id);
+    return responseFactory.success(ResponseCode.SUCCESS, new UserResponse(user));
+}
 
 
     public ApiResponse<List<UserResponseAdmin>> allUsers() {

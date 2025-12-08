@@ -36,7 +36,7 @@ public class PickupService {
             return responseFactory.error(ResponseCode.PICKUP_ALREADY_EXISTS);
         }
 
-        if (order.getStatus() != OrderStatus.ACCEPTED) {
+        if (order.getStatus() != OrderStatus.PICKING_UP) {
             return responseFactory.error(ResponseCode.INVALID_ORDER_STATUS);
         }
 
@@ -88,7 +88,7 @@ public class PickupService {
         }
 
         User driver = userRepo.findById(driverId).orElse(null);
-        if (driver == null || driver.getRole() != UserRole.DRIVER) {
+        if (driver == null || driver.getRole() == UserRole.CUSTOMER ) {
             return responseFactory.error(ResponseCode.INVALID_DRIVER);
         }
 
@@ -108,10 +108,10 @@ public class PickupService {
         }
 
         User driver = userRepo.findById(newDriverId).orElse(null);
-        if (driver == null || driver.getRole() != UserRole.DRIVER) {
+        if (driver == null || driver.getRole() == UserRole.CUSTOMER) {
             return responseFactory.error(ResponseCode.INVALID_DRIVER);
         }
-
+        pickup.setStatus(PickupStatus.DRIVER_ASSIGNED);
         pickup.setAssignedDriver(driver);
         pickupRepo.save(pickup);
 

@@ -9,6 +9,7 @@ public class EditServiceRequest {
     private ServiceType serviceType;
     private ItemType itemType;
     private Category category;
+    private Speed speed;
 
     @NotNull
     private Double price;

@@ -16,5 +16,8 @@ public class AddServiceRequest {
     private Category category;
 
     @NotNull
+    private Speed speed;
+
+    @NotNull
     private Double price;
 }

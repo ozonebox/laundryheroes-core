@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.laundryheroes.core.auth.UserResponse;
 import com.laundryheroes.core.common.ApiResponse;
 import com.laundryheroes.core.common.ResponseCode;
 import com.laundryheroes.core.common.ResponseFactory;

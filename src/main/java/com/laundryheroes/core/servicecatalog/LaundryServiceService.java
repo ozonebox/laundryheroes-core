@@ -31,6 +31,7 @@ public class LaundryServiceService {
         service.setItemType(request.getItemType());
         service.setCategory(request.getCategory());
         service.setPrice(request.getPrice());
+        service.setSpeed(request.getSpeed());
         service.setActive(true);
 
         repository.save(service);
@@ -54,6 +55,10 @@ public class LaundryServiceService {
         }
         if (request.getCategory() != null) {
             service.setCategory(request.getCategory());
+        }
+
+        if (request.getSpeed() != null) {
+            service.setSpeed(request.getSpeed());
         }
 
         service.setPrice(request.getPrice());

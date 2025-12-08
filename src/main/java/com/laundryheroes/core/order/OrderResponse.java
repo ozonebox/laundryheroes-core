@@ -7,7 +7,11 @@ import com.laundryheroes.core.address.Address;
 import com.laundryheroes.core.address.AddressResponse;
 import com.laundryheroes.core.auth.UserResponse;
 import com.laundryheroes.core.delivery.DeliveryRequest;
+import com.laundryheroes.core.delivery.DeliveryResponse;
+import com.laundryheroes.core.delivery.DeliveryResponseFull;
 import com.laundryheroes.core.pickup.PickupRequest;
+import com.laundryheroes.core.pickup.PickupResponse;
+import com.laundryheroes.core.pickup.PickupResponseFull;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -29,6 +33,6 @@ public class OrderResponse {
     private Instant createdAt;
     private Instant pickupTimeRequested;
     private List<OrderItemResponse> items;
-    private PickupRequest pickupRequest;
-    private DeliveryRequest deliveryRequest;
+    private PickupResponseFull pickupResponse;
+    private DeliveryResponseFull deliveryResponse;
 }

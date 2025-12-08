@@ -26,7 +26,7 @@ public class PickupRequest {
     @ManyToOne(optional = false)
     private Address pickupAddress;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = true)
     private User assignedDriver;
 
     @Enumerated(EnumType.STRING)

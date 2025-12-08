@@ -77,4 +77,31 @@ public class AdminNotificationController {
 
         return responseFactory.success(ResponseCode.SUCCESS,null);
     }
+
+    @PostMapping("/users")
+    public ApiResponse<Void> sendToUsers(@Valid @RequestBody BulkNotificationRequest req) {
+
+    List<User> users = userRepository.findAllById(req.getUserIds());
+
+    if (users.isEmpty()) {
+        return responseFactory.error(ResponseCode.INVALID_REQUEST, "No users found");
+    }
+
+    for (User user : users) {
+        notificationPublisher.notifyUser(
+            user,
+            req.getCategory(),
+        NotificationTemplate.ADMIN_BROADCAST,
+        Map.of(
+            "title", req.getTitle(),
+            "body", req.getBody(),
+            "meta", req.getMeta()
+        )
+    );
+}
+
+    return responseFactory.success(ResponseCode.SUCCESS, null);
+}
+
+
 }

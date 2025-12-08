@@ -42,7 +42,8 @@ public class SecurityConfig {
                         "/api/auth/logout",
                         "/api/ping",
                         "/v3/api-docs/**",
-                        "/swagger-ui/**"
+                        "/swagger-ui/**",
+                        "/ws/**"
                 ).permitAll()
                 .anyRequest().authenticated()
         );

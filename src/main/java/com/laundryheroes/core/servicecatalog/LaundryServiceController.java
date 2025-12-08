@@ -46,7 +46,7 @@ public class LaundryServiceController {
         return service.editService(id, request);
     }
 
-    @DeleteMapping("/{id}")
+    @PostMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','SUPERADMIN')")
     public ApiResponse<?> delete(@PathVariable Long id) {
         return service.deleteService(id);

@@ -32,6 +32,8 @@ public class AccountController {
         return accountService.editProfile(user,request);
     }
 
+    
+
     @PostMapping("/change-password")
     public ApiResponse<UserResponse> changePassword(@RequestBody @Valid ChangePasswordRequest request,org.springframework.security.core.Authentication auth) {
          User user = (User) auth.getPrincipal();

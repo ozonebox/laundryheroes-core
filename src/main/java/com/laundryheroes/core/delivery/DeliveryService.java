@@ -3,6 +3,7 @@ package com.laundryheroes.core.delivery;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.laundryheroes.core.auth.UserResponse;
 import com.laundryheroes.core.common.ApiResponse;
 import com.laundryheroes.core.common.ResponseCode;
 import com.laundryheroes.core.common.ResponseFactory;
@@ -32,7 +33,7 @@ public class DeliveryService {
             return responseFactory.error(ResponseCode.ORDER_NOT_FOUND);
         }
 
-        if (order.getStatus() != OrderStatus.READY) {
+        if (order.getStatus() != OrderStatus.OUT_FOR_DELIVERY) {
             return responseFactory.error(ResponseCode.INVALID_ORDER_STATUS);
         }
 
@@ -49,8 +50,9 @@ public class DeliveryService {
 
         order.setDelivery(d);
         order.setStatus(OrderStatus.OUT_FOR_DELIVERY);
+        orderRepo.save(order);
 
-        return responseFactory.success(ResponseCode.SUCCESS, toResponse(d));
+        return responseFactory.success(ResponseCode.SUCCESS, toResponseDirect(d));
     }
 
     @Transactional
@@ -66,7 +68,7 @@ public class DeliveryService {
         }
 
         User driver = userRepo.findById(driverId).orElse(null);
-        if (driver == null || driver.getRole() != UserRole.DRIVER) {
+        if (driver == null || driver.getRole() == UserRole.CUSTOMER) {
             return responseFactory.error(ResponseCode.INVALID_DRIVER);
         }
 
@@ -87,11 +89,12 @@ public class DeliveryService {
         }
 
         User driver = userRepo.findById(newDriverId).orElse(null);
-        if (driver == null || driver.getRole() != UserRole.DRIVER) {
+        if (driver == null || driver.getRole() == UserRole.CUSTOMER) {
             return responseFactory.error(ResponseCode.INVALID_DRIVER);
         }
-
+        
         d.setAssignedDriver(driver);
+        d.setStatus(DeliveryStatus.DRIVER_ASSIGNED);
         deliveryRepo.save(d);
 
         return responseFactory.success(ResponseCode.SUCCESS, toResponseDirect(d));
@@ -158,17 +161,10 @@ public class DeliveryService {
         return responseFactory.success(ResponseCode.SUCCESS, toResponseDirect(d));
     }
 
-    private DeliveryResponse toResponse(DeliveryRequest d) {
-        return new DeliveryResponse(
-                d.getId(),
-                d.getOrder().getId(),
-                d.getDeliveryAddress().getId(),
-                d.getStatus(),
-                d.getCreatedAt()
-        );
-    }
+   
 
     public DeliveryResponse toResponseDirect(DeliveryRequest d) {
+         
         return new DeliveryResponse(
                 d.getId(),
                 d.getOrder().getId(),

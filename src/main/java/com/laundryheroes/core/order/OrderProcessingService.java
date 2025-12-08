@@ -11,9 +11,13 @@ import com.laundryheroes.core.auth.UserResponse;
 import com.laundryheroes.core.common.ApiResponse;
 import com.laundryheroes.core.common.ResponseCode;
 import com.laundryheroes.core.common.ResponseFactory;
+import com.laundryheroes.core.delivery.DeliveryResponse;
+import com.laundryheroes.core.delivery.DeliveryResponseFull;
 import com.laundryheroes.core.notification.NotificationCategory;
 import com.laundryheroes.core.notification.NotificationPublisher;
 import com.laundryheroes.core.notification.NotificationTemplate;
+import com.laundryheroes.core.pickup.PickupResponse;
+import com.laundryheroes.core.pickup.PickupResponseFull;
 import com.laundryheroes.core.user.User;
 import com.laundryheroes.core.websocket.AdminRealtimeService;
 
@@ -179,8 +183,9 @@ public class OrderProcessingService {
                                 i.getSubtotal(),
                                 i.getLaundryService().getSpeed()
                         )).toList(),
-                order.getPickup(),
-                order.getDelivery()
+                order.getPickup()!=null? new PickupResponseFull(order.getPickup().getId(),order.getId(),order.getPickup().getPickupAddress().getId(),order.getPickup().getStatus(),order.getPickup().getScheduledFor(),order.getPickup().getCreatedAt(),new UserResponse(order.getPickup().getAssignedDriver())):new PickupResponseFull(),
+                order.getDelivery()!=null?new DeliveryResponseFull(order.getDelivery().getId(),order.getId(),order.getDelivery().getDeliveryAddress().getId(),order.getDelivery().getStatus(),order.getDelivery().getCreatedAt(),new UserResponse(order.getDelivery().getAssignedDriver())): new DeliveryResponseFull()
+        
         );
         }
     

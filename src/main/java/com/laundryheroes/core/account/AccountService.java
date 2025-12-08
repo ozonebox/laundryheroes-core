@@ -156,6 +156,88 @@ public class AccountService {
         return responseFactory.success(ResponseCode.EDIT_PROFILE_SUCCESS, data);
     }
 
+
+    @Transactional
+    public ApiResponse<UserResponse> adminEditProfile(User authUser, AdminEditProfileRequest request) {
+
+    // ----------------------------------------------------
+    // 1. Basic safety check: email cannot be changed
+    // ----------------------------------------------------
+    if (!authUser.getEmail().equalsIgnoreCase(request.getEmail())) {
+        return responseFactory.error(ResponseCode.INVALID_REQUEST);
+    }
+
+    // ----------------------------------------------------
+    // 2. Fetch user
+    // ----------------------------------------------------
+    Optional<User> optional = userRepository.findByEmail(authUser.getEmail());
+    if (optional.isEmpty()) {
+        return responseFactory.error(ResponseCode.USER_NOT_FOUND);
+    }
+
+    User user = optional.get();
+
+    // ----------------------------------------------------
+    // 3. Blocked / Disabled user checks
+    // ----------------------------------------------------
+    if (user.getProfileStatus() == ProfileStatus.BLOCKED ||
+        user.getProfileStatus() == ProfileStatus.DISABLED) {
+        return responseFactory.error(ResponseCode.USER_BLOCKED);
+    }
+
+    // ----------------------------------------------------
+    // 4. Validate incoming fields (optional)
+    // ----------------------------------------------------
+    // if (request.getPhoneNumber() != null && request.getPhoneNumber().length() < 6) {
+    //     return responseFactory.error(ResponseCode.INVALID_PHONE);
+    // }
+
+    if (request.getFirstName() != null && request.getFirstName().length() < 2) {
+        return responseFactory.error(ResponseCode.INVALID_FIRST_NAME);
+    }
+
+    if (request.getLastName() != null && request.getLastName().length() < 2) {
+        return responseFactory.error(ResponseCode.INVALID_LAST_NAME);
+    }
+
+    // ----------------------------------------------------
+    // 5. Apply updates only if fields are present
+    // ----------------------------------------------------
+    if (request.getFirstName() != null) user.setFirstName(request.getFirstName().trim());
+    if (request.getLastName() != null) user.setLastName(request.getLastName().trim());
+    if (request.getGender() != null) user.setGender(request.getGender());
+    //if (request.getPhoneNumber() != null) user.setPhoneNumber(request.getPhoneNumber());
+    //if (request.getDob() != null) user.setDob(request.getDob());
+    //if (request.getCountry() != null) user.setCountry(request.getCountry());
+    //if (request.getAddress() != null) user.setAddress(request.getAddress());
+    //if (request.getAvatarUrl() != null) user.setAvatarUrl(request.getAvatarUrl());
+
+    // ----------------------------------------------------
+    // 6. Save updated user
+    // ----------------------------------------------------
+    userRepository.save(user);
+
+    // ----------------------------------------------------
+    // 7. Return updated profile
+    // ----------------------------------------------------
+    UserResponse data = UserResponse.builder()
+            .id(user.getId())
+            .email(user.getEmail())
+            .firstName(user.getFirstName())
+            .lastName(user.getLastName())
+            .gender(user.getGender())
+            //.phoneNumber(user.getPhoneNumber())
+            //.dob(user.getDob())
+            //.country(user.getCountry())
+            //.address(user.getAddress())
+            //.avatarUrl(user.getAvatarUrl())
+            .profileStatus(user.getProfileStatus())
+            //.updatedAt(user.getUpdatedAt())
+            .build();
+
+    return responseFactory.success(ResponseCode.EDIT_PROFILE_SUCCESS, data);
+}
+
     @Transactional
     public ApiResponse<UserResponse> changePassword(User authUser,ChangePasswordRequest request) {
 

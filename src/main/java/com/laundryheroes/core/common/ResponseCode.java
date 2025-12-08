@@ -53,7 +53,13 @@ public enum ResponseCode {
     INVALID_REFRESH_TOKEN("13","Cannot proceed. Invalid driver."),
     PROFILE_NOT_ACTIVE("31","Cannot proceed. No access."),
     LOGOUT_SUCCESS("00","Logout successful."),
-    PASSWORD_MISMATCH("12","Passwords don't match");
+    PASSWORD_MISMATCH("12","Passwords don't match"),
+    INVALID_PHONE("12","Invalid Phone Number"),
+    INVALID_FIRST_NAME("12","Invalid First Name"),
+    INVALID_LAST_NAME("12","Invalid Last Name"),
+    TEMPLATE_NOT_FOUND("21","Template not found"),
+    NOT_FOUND("34","Store settings not initialized"),
+    STORE_CLOSED("88","Cannot place orders right now, we are currently closed");
 
 
 

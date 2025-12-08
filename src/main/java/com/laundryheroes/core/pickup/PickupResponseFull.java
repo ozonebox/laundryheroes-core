@@ -2,6 +2,8 @@ package com.laundryheroes.core.pickup;
 
 import java.time.Instant;
 
+import com.laundryheroes.core.auth.UserResponse;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PickupResponse {
+public class PickupResponseFull {
 
     private Long id;
     private Long orderId;
@@ -17,4 +19,5 @@ public class PickupResponse {
     private PickupStatus status;
     private Instant scheduledFor;
     private Instant createdAt;
+    private UserResponse assignedDriver;
 }
