@@ -18,7 +18,8 @@ public class WebConfig {
                         .allowedOrigins(
                             "http://localhost:3000",
                             "https://ad90.laundryheroes.com",
-                            "https://s3.us-east-1.amazonaws.com" // your future prod admin
+                            "https://s3.us-east-1.amazonaws.com",
+                            "http://ad90.laundryheroes.org.s3-website-us-east-1.amazonaws.com" // your future prod admin
                         )
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                         .allowedHeaders("*")
