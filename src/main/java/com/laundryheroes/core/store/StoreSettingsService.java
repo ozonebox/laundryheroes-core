@@ -4,6 +4,9 @@ import com.laundryheroes.core.common.ApiResponse;
 import com.laundryheroes.core.common.ResponseCode;
 import com.laundryheroes.core.common.ResponseFactory;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.PostConstruct;
@@ -15,15 +18,15 @@ public class StoreSettingsService {
     private final StoreSettingsRepository repo;
     private final ResponseFactory responseFactory;
 
-    @PostConstruct
-    public void init() {
-        // Ensure exactly 1 row always exists
+    @EventListener(ApplicationReadyEvent.class)
+    public void initAfterStartup() {
         if (repo.count() == 0) {
             StoreSettings s = new StoreSettings();
             s.setOpen(true);
             repo.save(s);
         }
     }
+
 
     public ApiResponse<StoreSettings> get() {
         StoreSettings settings = repo.findAll().stream().findFirst().orElse(null);
@@ -48,7 +51,12 @@ public class StoreSettingsService {
         return responseFactory.success(ResponseCode.SUCCESS, settings);
     }
     public StoreSettings getRaw() {
-        return repo.findAll().get(0);
-    }
+    return repo.findAll().stream().findFirst().orElseGet(() -> {
+        StoreSettings s = new StoreSettings();
+        s.setOpen(true);
+        return repo.save(s);
+    });
+}
+
 
 }
