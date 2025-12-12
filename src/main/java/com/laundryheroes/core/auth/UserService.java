@@ -69,7 +69,7 @@ public class UserService {
         }
 
         String hashedPassword = passwordEncoder.encode(request.getPassword());
-        User user = new User(request.getEmail(), hashedPassword);
+        User user = new User(request.getEmail().toLowerCase(), hashedPassword);
         User saved = userRepository.save(user);
         UserResponse data = UserResponse.builder()
             .id(saved.getId())
@@ -89,7 +89,7 @@ public class UserService {
                                        String ipAddress,
                                        String userAgent) {
 
-        Optional<User> optional = userRepository.findByEmail(request.getEmail());
+        Optional<User> optional = userRepository.findByEmail(request.getEmail().toLowerCase());
         if (optional.isEmpty()) {
             return responseFactory.error(ResponseCode.LOGIN_FAILED);
         }
@@ -172,7 +172,7 @@ public class UserService {
     @Transactional
     public ApiResponse<VerifyEmailResponse> sendVerificationOtp(User authUser,VerifyEmailRequest request) {
 
-    Optional<User> optional = userRepository.findByEmail(authUser.getEmail());
+    Optional<User> optional = userRepository.findByEmail(authUser.getEmail().toLowerCase());
     if (optional.isEmpty()) {
         return responseFactory.error(ResponseCode.USER_NOT_FOUND);
     }
@@ -212,7 +212,7 @@ public class UserService {
     @Transactional
     public ApiResponse<UserResponse> activateUser(User authUser,ActivateUserRequest request) {
 
-        Optional<User> optional = userRepository.findByEmail(authUser.getEmail());
+        Optional<User> optional = userRepository.findByEmail(authUser.getEmail().toLowerCase());
         if (optional.isEmpty()) {
             return responseFactory.error(ResponseCode.USER_NOT_FOUND);
         }
@@ -280,7 +280,7 @@ public class UserService {
     @Transactional
     public ApiResponse<ResetPasswordInitResponse> resetPasswordInit(ResetPasswordInitRequest request) {
 
-        Optional<User> optional = userRepository.findByEmail(request.getEmail());
+        Optional<User> optional = userRepository.findByEmail(request.getEmail().toLowerCase());
         if (optional.isEmpty()) {
             return responseFactory.error(ResponseCode.USER_NOT_FOUND);
         }
@@ -320,7 +320,7 @@ public class UserService {
     @Transactional
     public ApiResponse<UserResponse> resetPasswordComplete(ResetPasswordCompleteRequest request) {
 
-        Optional<User> optional = userRepository.findByEmail(request.getEmail());
+        Optional<User> optional = userRepository.findByEmail(request.getEmail().toLowerCase());
         if (optional.isEmpty()) {
             return responseFactory.error(ResponseCode.USER_NOT_FOUND);
         }
@@ -380,7 +380,7 @@ public class UserService {
     @Transactional
     public ApiResponse<UserResponse> refresh(RefreshTokenRequest request) {
 
-        var optionalRotated = refreshTokenService.validateAndRotate(request.getEmail(),request.getRefreshToken());
+        var optionalRotated = refreshTokenService.validateAndRotate(request.getEmail().toLowerCase(),request.getRefreshToken());
         if (optionalRotated.isEmpty()) {
             return responseFactory.error(ResponseCode.INVALID_REFRESH_TOKEN);
         }
@@ -412,7 +412,7 @@ public class UserService {
     public ApiResponse<?> logout(RefreshTokenRequest request) {
 
         if (request.getRefreshToken() != null && !request.getRefreshToken().isBlank()) {
-            refreshTokenService.revokeAllForToken(request.getEmail(),request.getRefreshToken() );
+            refreshTokenService.revokeAllForToken(request.getEmail().toLowerCase(),request.getRefreshToken() );
         }
 
         return responseFactory.success(ResponseCode.LOGOUT_SUCCESS, null);

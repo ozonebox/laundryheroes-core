@@ -81,7 +81,7 @@ public class AccountService {
          if(!authUser.getEmail().equalsIgnoreCase(authUser.getEmail())){
             return responseFactory.error(ResponseCode.INVALID_REQUEST);
         }
-        Optional<User> optional = userRepository.findByEmail(authUser.getEmail());
+        Optional<User> optional = userRepository.findByEmail(authUser.getEmail().toLowerCase());
         if (optional.isEmpty()) {
             return responseFactory.error(ResponseCode.USER_NOT_FOUND);
         }
@@ -127,7 +127,7 @@ public class AccountService {
          if(!authUser.getEmail().equalsIgnoreCase(request.getEmail())){
             return responseFactory.error(ResponseCode.INVALID_REQUEST);
         }
-        Optional<User> optional = userRepository.findByEmail(authUser.getEmail());
+        Optional<User> optional = userRepository.findByEmail(authUser.getEmail().toLowerCase());
         if (optional.isEmpty()) {
             return responseFactory.error(ResponseCode.USER_NOT_FOUND);
         }
@@ -170,7 +170,7 @@ public class AccountService {
     // ----------------------------------------------------
     // 2. Fetch user
     // ----------------------------------------------------
-    Optional<User> optional = userRepository.findByEmail(authUser.getEmail());
+    Optional<User> optional = userRepository.findByEmail(authUser.getEmail().toLowerCase());
     if (optional.isEmpty()) {
         return responseFactory.error(ResponseCode.USER_NOT_FOUND);
     }
@@ -245,7 +245,7 @@ public class AccountService {
             return responseFactory.error(ResponseCode.INVALID_REQUEST);
         }
 
-        Optional<User> optional = userRepository.findByEmail(authUser.getEmail());
+        Optional<User> optional = userRepository.findByEmail(authUser.getEmail().toLowerCase());
         if (optional.isEmpty()) {
             return responseFactory.error(ResponseCode.USER_NOT_FOUND);
         }

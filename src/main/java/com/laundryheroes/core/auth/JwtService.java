@@ -44,7 +44,7 @@ public class JwtService {
         Date expiry = new Date(now.getTime() + accessExpirationMs);
 
         return Jwts.builder()
-                .setSubject(user.getEmail())
+                .setSubject(user.getEmail().toLowerCase())
                 .setIssuedAt(now)
                 .setExpiration(expiry)
                 .claim("id", user.getId())
@@ -64,7 +64,7 @@ public class JwtService {
         String refreshTokenValue = UUID.randomUUID().toString() + "." + UUID.randomUUID();
 
         return Jwts.builder()
-                .setSubject(user.getEmail())
+                .setSubject(user.getEmail().toLowerCase())
                 .setIssuedAt(now)
                 .setExpiration(expiry)
                 .claim("id", user.getId())
