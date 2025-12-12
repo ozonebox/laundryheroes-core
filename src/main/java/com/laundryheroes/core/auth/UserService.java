@@ -1,3 +1,4 @@
+
 package com.laundryheroes.core.auth;
 
 import java.time.Instant;
@@ -18,6 +19,7 @@ import com.laundryheroes.core.common.GeoIpService;
 import com.laundryheroes.core.common.ResponseCode;
 import com.laundryheroes.core.common.ResponseFactory;
 import com.laundryheroes.core.email.EmailService;
+import com.laundryheroes.core.email.EmailTemplateModel;
 import com.laundryheroes.core.notification.NotificationCategory;
 import com.laundryheroes.core.notification.NotificationPublisher;
 import com.laundryheroes.core.notification.NotificationTemplate;
@@ -199,11 +201,16 @@ public class UserService {
 
     userRepository.save(user);
 
-    emailService.sendEmail(
-            user.getEmail(),
-            "Your Laundry Heroes Verification Code",
-            "Your OTP is: " + otp
-    );
+    String title ="Your Laundry Heroes Verification Code";
+    String body="Your OTP is: " + otp;
+    emailService.sendTemplatedEmail(user.getEmail(),title, new EmailTemplateModel(
+        title,
+        body,
+        null,
+        null,
+        "If you do not recognize this activity, please login and change your password now."
+    ));
+    
 
     VerifyEmailResponse data = new VerifyEmailResponse(authKey,user.getEmail());
     return responseFactory.success(ResponseCode.EMAIL_SENT, data);
