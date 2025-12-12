@@ -20,7 +20,7 @@ public class EmailNotificationSender implements NotificationChannelSender {
     public void send(User user, String title, String body, Map<String, Object> meta) {
         if (user.getEmail() == null) return;
         //emailService.sendEmail(user.getEmail(), title, body);
-        emailService.sendTemplatedEmail(title, body, new EmailTemplateModel(
+        emailService.sendTemplatedEmail(user.getEmail(), title, new EmailTemplateModel(
     title,
     body,
     null,
