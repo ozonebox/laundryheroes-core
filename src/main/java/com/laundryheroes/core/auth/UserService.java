@@ -348,7 +348,12 @@ public class UserService {
             return responseFactory.error(ResponseCode.RESET_OTP_EXPIRED);
         }
 
-        if (!user.getResetOtp().equals(request.getOtp())) {
+        boolean otpOk = passwordEncoder.matches(
+                request.getOtp(),
+                user.getResetOtp()
+        );
+
+        if (!otpOk) {
             return responseFactory.error(ResponseCode.INVALID_RESET_OTP);
         }
 
