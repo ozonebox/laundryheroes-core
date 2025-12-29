@@ -184,7 +184,9 @@ public class OrderProcessingService {
                                 i.getLaundryService().getSpeed()
                         )).toList(),
                 order.getPickup()!=null? new PickupResponseFull(order.getPickup().getId(),order.getId(),order.getPickup().getPickupAddress().getId(),order.getPickup().getStatus(),order.getPickup().getScheduledFor(),order.getPickup().getCreatedAt(),new UserResponse(order.getPickup().getAssignedDriver())):new PickupResponseFull(),
-                order.getDelivery()!=null?new DeliveryResponseFull(order.getDelivery().getId(),order.getId(),order.getDelivery().getDeliveryAddress().getId(),order.getDelivery().getStatus(),order.getDelivery().getCreatedAt(),new UserResponse(order.getDelivery().getAssignedDriver())): new DeliveryResponseFull()
+                order.getDelivery()!=null?new DeliveryResponseFull(order.getDelivery().getId(),order.getId(),order.getDelivery().getDeliveryAddress().getId(),order.getDelivery().getStatus(),order.getDelivery().getCreatedAt(),new UserResponse(order.getDelivery().getAssignedDriver())): new DeliveryResponseFull(),
+                order.getCustomerPhone(),
+                order.getCustomerEmail()
         
         );
         }

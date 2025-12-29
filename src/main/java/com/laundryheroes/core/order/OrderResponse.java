@@ -35,4 +35,7 @@ public class OrderResponse {
     private List<OrderItemResponse> items;
     private PickupResponseFull pickupResponse;
     private DeliveryResponseFull deliveryResponse;
+    private String customerPhone;
+
+    private String customerEmail;
 }
