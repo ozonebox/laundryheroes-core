@@ -29,9 +29,9 @@ public class PresetService {
                 true,
                 List.of(
                     // THOB – WASH_PRESS NORMAL (id=4) ×5
-                    new PresetItem(4, 5),
+                    new PresetItem(86, 5),
                     // GHOTRA – PRESS NORMAL (id=18) ×5
-                    new PresetItem(18, 5)
+                    new PresetItem(99, 5)
                 ),
                 45 // 5×5 + 5×4 = 25 + 20 = 45
             ),
@@ -45,13 +45,13 @@ public class PresetService {
                 true,
                 List.of(
                     // BISHT – DRY_CLEAN NORMAL (id=20) ×1
-                    new PresetItem(20, 1),
+                    new PresetItem(100, 1),
                     // JACKET – DRY_CLEAN NORMAL (id=26) ×1
-                    new PresetItem(26, 1),
+                    new PresetItem(106, 1),
                     // GHOTRA – DRY_CLEAN NORMAL (id=14) ×1
-                    new PresetItem(14, 1),
+                    new PresetItem(94, 1),
                     // THOB_WOOL – DRY_CLEAN NORMAL (id=8) ×1
-                    new PresetItem(8, 1)
+                    new PresetItem(87, 1)
                 ),
                 68 // 30 + 15 + 8 + 15 = 68
             ),
@@ -65,9 +65,9 @@ public class PresetService {
                 true,
                 List.of(
                     // ABAYA – WASH_PRESS NORMAL (id=34) ×4
-                    new PresetItem(34, 4),
+                    new PresetItem(114, 4),
                     // BLOUSE – WASH_PRESS NORMAL (id=40) ×4
-                    new PresetItem(40, 4)
+                    new PresetItem(120, 4)
                 ),
                 80 // 4×15 + 4×5 = 60 + 20 = 80
             ),
@@ -81,9 +81,9 @@ public class PresetService {
                 true,
                 List.of(
                     // WEDDING_DRESS – DRY_CLEAN NORMAL (id=44) ×1
-                    new PresetItem(44, 1),
+                    new PresetItem(124, 1),
                     // WEDDING_DRESS – PRESS NORMAL (id=46) ×1
-                    new PresetItem(46, 1)
+                    new PresetItem(126, 1)
                 ),
                 300 // 200 + 100 = 300
             ),
@@ -97,9 +97,9 @@ public class PresetService {
                 true,
                 List.of(
                     // SPECIAL_SARI – DRY_CLEAN NORMAL (id=48) ×3
-                    new PresetItem(48, 3),
+                    new PresetItem(128, 3),
                     // SPECIAL_SARI – PRESS NORMAL (id=52) ×3
-                    new PresetItem(52, 3)
+                    new PresetItem(132, 3)
                 ),
                 156 // 3×40 + 3×12 = 120 + 36 = 156
             ),
@@ -113,9 +113,9 @@ public class PresetService {
                 true,
                 List.of(
                     // THOB (KIDS) – WASH_PRESS NORMAL (id=56) ×5
-                    new PresetItem(56, 5),
+                    new PresetItem(136, 5),
                     // DRESS (KIDS) – WASH_PRESS NORMAL (id=62) ×3
-                    new PresetItem(62, 3)
+                    new PresetItem(142, 3)
                 ),
                 79 // 5×5 + 3×18 = 25 + 54 = 79
             ),
@@ -129,9 +129,9 @@ public class PresetService {
                 true,
                 List.of(
                     // BED_SHEET – WASH_PRESS NORMAL (id=74) ×4
-                    new PresetItem(74, 4),
+                    new PresetItem(154, 4),
                     // PILLOW – WASH_PRESS NORMAL (id=86) ×4
-                    new PresetItem(86, 4)
+                    new PresetItem(166, 4)
                 ),
                 64 // 4×10 + 4×6 = 40 + 24 = 64
             ),
@@ -145,9 +145,9 @@ public class PresetService {
                 true,
                 List.of(
                     // CURTAINS_BIG – WASH_PRESS NORMAL (id=80) ×3
-                    new PresetItem(80, 3),
+                    new PresetItem(160, 3),
                     // BED_SHEET – WASH_PRESS NORMAL (id=74) ×3
-                    new PresetItem(74, 3)
+                    new PresetItem(154, 3)
                 ),
                 99 // 3×23 + 3×10 = 69 + 30 = 99
             )
