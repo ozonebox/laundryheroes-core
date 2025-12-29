@@ -66,6 +66,8 @@ public class OrderService {
         Order order = new Order();
         order.setUser(user);
         order.setAddress(address);
+        order.setCustomerPhone(request.getCustomerPhone());
+        order.setCustomerEmail(request.getCustomerEmail());
         order.setDeliveryAddress(deliveryAddress);
         order.setPaymentMethod(request.getPaymentMethod());
         order.setServiceSpeed(request.getServiceSpeed());

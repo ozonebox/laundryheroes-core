@@ -24,6 +24,10 @@ public class CreateOrderRequest {
     @NotNull
     private Instant pickupTimeRequested;
 
+    private String customerPhone;
+
+    private String customerEmail;
+
     @NotNull
     private List<CreateOrderItemRequest> items;
 }

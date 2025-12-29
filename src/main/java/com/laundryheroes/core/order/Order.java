@@ -9,9 +9,8 @@ import com.laundryheroes.core.pickup.PickupRequest;
 import com.laundryheroes.core.user.User;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Table(name = "orders")
@@ -45,6 +44,13 @@ public class Order {
     @Column(nullable = false)
     private double totalAmount;
 
+
+    @Column(nullable = true)
+    private String customerPhone;
+
+    @Column(nullable = true)
+    private String customerEmail;
+
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -63,6 +69,8 @@ public class Order {
     @OneToOne
     @JoinColumn(name = "delivery_id")
     private DeliveryRequest delivery;
+
+
 
     @PrePersist
     public void prePersist() {
