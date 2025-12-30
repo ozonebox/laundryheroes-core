@@ -171,7 +171,7 @@ public class AccountService {
     // ----------------------------------------------------
     // 2. Fetch user
     // ----------------------------------------------------
-    Optional<User> optional = userRepository.findByEmail(authUser.getEmail().toLowerCase());
+    Optional<User> optional = userRepository.findByEmail(request.getEmail().toLowerCase());
     if (optional.isEmpty()) {
         return responseFactory.error(ResponseCode.USER_NOT_FOUND);
     }
@@ -194,11 +194,11 @@ public class AccountService {
     // }
 
     if (request.getFirstName() != null && request.getFirstName().length() < 2) {
-        return responseFactory.error(ResponseCode.INVALID_FIRST_NAME);
+        //return responseFactory.error(ResponseCode.INVALID_FIRST_NAME);
     }
 
     if (request.getLastName() != null && request.getLastName().length() < 2) {
-        return responseFactory.error(ResponseCode.INVALID_LAST_NAME);
+        //return responseFactory.error(ResponseCode.INVALID_LAST_NAME);
     }
 
     // ----------------------------------------------------
