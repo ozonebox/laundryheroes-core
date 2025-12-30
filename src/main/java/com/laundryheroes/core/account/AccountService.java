@@ -33,6 +33,7 @@ import com.laundryheroes.core.servicecatalog.ServiceResponse;
 import com.laundryheroes.core.user.ProfileStatus;
 import com.laundryheroes.core.user.User;
 import com.laundryheroes.core.user.UserRepository;
+import com.laundryheroes.core.user.UserRole;
 
 @Service
 public class AccountService {
@@ -161,9 +162,9 @@ public class AccountService {
     public ApiResponse<UserResponse> adminEditProfile(User authUser, AdminEditProfileRequest request) {
 
     // ----------------------------------------------------
-    // 1. Basic safety check: email cannot be changed
+    // 1. Basic safety check: user must be an admin
     // ----------------------------------------------------
-    if (!authUser.getEmail().equalsIgnoreCase(request.getEmail())) {
+    if (authUser.getRole()!=UserRole.SUPERADMIN&&authUser.getRole()!=UserRole.ADMIN) {
         return responseFactory.error(ResponseCode.INVALID_REQUEST);
     }
 
