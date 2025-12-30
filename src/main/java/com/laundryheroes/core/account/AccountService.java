@@ -207,6 +207,7 @@ public class AccountService {
     if (request.getFirstName() != null) user.setFirstName(request.getFirstName().trim());
     if (request.getLastName() != null) user.setLastName(request.getLastName().trim());
     if (request.getGender() != null) user.setGender(request.getGender());
+    if(request.getRole() != null) user.setRole(request.getRole());
     //if (request.getPhoneNumber() != null) user.setPhoneNumber(request.getPhoneNumber());
     //if (request.getDob() != null) user.setDob(request.getDob());
     //if (request.getCountry() != null) user.setCountry(request.getCountry());

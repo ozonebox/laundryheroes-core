@@ -1,5 +1,7 @@
 package com.laundryheroes.core.account;
 
+import com.laundryheroes.core.user.UserRole;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -14,7 +16,7 @@ public class AdminEditProfileRequest {
     private String firstName;
     private String lastName;
     private String gender;
-    // private String phoneNumber;
+     private UserRole role;
     // private String dob;         // or LocalDate depending on your model
     // private String country;
     // private String address;
