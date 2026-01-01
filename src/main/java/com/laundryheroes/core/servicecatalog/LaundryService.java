@@ -19,7 +19,7 @@ public class LaundryService {
     private ServiceType serviceType;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 60)
+    @Column(nullable = false, length = 61)
     private ItemType itemType;
 
     @Enumerated(EnumType.STRING)
