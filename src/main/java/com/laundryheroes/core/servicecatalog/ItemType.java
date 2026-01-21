@@ -97,4 +97,5 @@ public enum ItemType {
     TABLE_COVER,
     CHAIR_COVER,
     SOFA_COVER,
+    SHORT
 }
